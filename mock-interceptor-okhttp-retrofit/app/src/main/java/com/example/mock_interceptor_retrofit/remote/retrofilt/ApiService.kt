@@ -2,7 +2,7 @@ package com.example.mock_interceptor_retrofit.remote.retrofilt
 
 import retrofit2.http.GET
 
-interface ApiService {
+interface MockApiService {
     @GET("data")
     suspend fun getData(): List<ResponseModel>
 

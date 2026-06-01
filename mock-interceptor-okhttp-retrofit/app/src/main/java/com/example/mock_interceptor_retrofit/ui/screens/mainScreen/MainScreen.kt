@@ -12,12 +12,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun MainScreen(
-    viewModel: MainScreenViewModel = viewModel()
+    viewModel: MainScreenViewModel = hiltViewModel()
 ) {
 
     val dataList by viewModel.uiState.collectAsStateWithLifecycle()

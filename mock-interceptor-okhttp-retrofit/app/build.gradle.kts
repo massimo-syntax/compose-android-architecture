@@ -1,7 +1,11 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    // hilt
+    id("com.google.dagger.hilt.android")
+    id("com.google.devtools.ksp")
 }
+
 
 android {
     namespace = "com.example.mock_interceptor_retrofit"
@@ -70,5 +74,13 @@ dependencies {
     // retrofit
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+
+
+    // Hilt core
+    implementation(libs.hilt.android)
+    ksp("com.google.dagger:hilt-compiler:2.59.2") // use hilt-compiler with KSP
+
+    // A) Hilt 1.3.0+ without Navigation dependency (new artifact for hiltViewModel)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
 
 }

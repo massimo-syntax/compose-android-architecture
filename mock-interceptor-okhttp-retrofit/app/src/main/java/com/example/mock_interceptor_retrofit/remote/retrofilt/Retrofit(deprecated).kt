@@ -1,11 +1,7 @@
 package com.example.mock_interceptor_retrofit.remote.retrofilt
 
-import okhttp3.OkHttpClient
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import kotlin.getValue
-
-val mockRetrofit: ApiService by lazy {
+/*
+val mockRetrofit: MockApiService by lazy {
     val client = OkHttpClient.Builder()
         .addInterceptor(MockInterceptor())
         .build()
@@ -14,5 +10,7 @@ val mockRetrofit: ApiService by lazy {
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
-        .create(ApiService::class.java)
+        .create(MockApiService::class.java)
 }
+
+*/
