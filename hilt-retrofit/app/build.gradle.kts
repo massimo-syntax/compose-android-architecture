@@ -66,7 +66,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
 
     // OkHttp
-    implementation("com.squareup.okhttp:okhttp:2.7.5")
+    implementation("com.squareup.okhttp3:okhttp:5.3.2")
 
     // dagger hilt
     implementation("com.google.dagger:hilt-android:2.59.2")
