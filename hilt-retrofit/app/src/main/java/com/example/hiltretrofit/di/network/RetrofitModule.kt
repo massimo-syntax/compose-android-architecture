@@ -1,6 +1,7 @@
 package com.example.hiltretrofit.di.network
 
 import com.example.hiltretrofit.data.remote.DefaultApiService
+import com.example.hiltretrofit.data.remote.MockApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,6 +24,18 @@ object AnalyticsModule {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(DefaultApiService::class.java)
+    }
+
+    @Provides
+    fun provideMockApiService(
+        @MockInterceptorOkHttpClient client: OkHttpClient
+    ): MockApiService {
+        return Retrofit.Builder()
+            .baseUrl("https://urlnotneeded.io")
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(MockApiService::class.java)
     }
 
 }

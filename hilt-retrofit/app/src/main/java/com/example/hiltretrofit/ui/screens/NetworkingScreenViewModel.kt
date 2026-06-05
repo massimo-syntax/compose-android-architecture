@@ -3,6 +3,7 @@ package com.example.hiltretrofit.ui.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.hiltretrofit.data.model.SimpleModel
+import com.example.hiltretrofit.data.remote.RequestParam
 import com.example.hiltretrofit.data.repository.NetworkRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +22,17 @@ class NetworkingScreenViewModel @Inject constructor(
 
     fun getData(){
         viewModelScope.launch {
-            val data = repo.getData()
+            _uiState.update { repo.getDefaultData() }
+        }
+    }
+
+    fun getFeaturesDescription(param: RequestParam){
+        // just write Loading.. on the screen
+        _uiState.update { emptyList() }
+
+        // mock server request
+        viewModelScope.launch {
+            val data = repo.getDetailsData(param)
             _uiState.update { data }
         }
     }

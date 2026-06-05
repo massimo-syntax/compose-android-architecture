@@ -1,5 +1,6 @@
 package com.example.hiltretrofit.data.remote.interceptors
 
+import com.example.hiltretrofit.data.remote.choices
 import jakarta.inject.Inject
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -20,9 +21,7 @@ class DefaultInterceptor @Inject constructor() : Interceptor {
         // val mediaType = originalResponse.body?.contentType() ?: "application/json".toMediaTypeOrNull()
         // val newBody = modifiedBody.toResponseBody(mediaType)
 
-        val jsonResponseBody = """
-            [ {"id":"123","content":"text from default interceptor"} ]
-        """.trimIndent()
+        val jsonResponseBody = choices
 
         val response = Response.Builder()
             .request(chain.request())
