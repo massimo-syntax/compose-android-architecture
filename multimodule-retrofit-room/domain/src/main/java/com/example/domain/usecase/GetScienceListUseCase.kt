@@ -1,8 +1,10 @@
 package com.example.domain.usecase
 
+import com.example.domain.model.EventualNetworkFeedback
 import com.example.domain.model.Science
 import com.example.domain.repository.ScienceRepository
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 class GetScienceListUseCase @Inject constructor(
     private val repository: ScienceRepository
@@ -13,7 +15,10 @@ class GetScienceListUseCase @Inject constructor(
         return repository.getPopularMovies()
     }
      */
-    operator suspend fun invoke(): List<Science> =
-        repository.getScienceList()
+    fun observeDb(): Flow<List<Science>> = repository.observeScienceDb()
+
+    operator suspend fun invoke(): EventualNetworkFeedback {
+        return repository.requestAndSaveScienceList()
+    }
 
 }

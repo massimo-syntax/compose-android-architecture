@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
+    // room annotation
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -23,10 +25,7 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.material)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.junit)
+    // room bundle runtime + ktx
+    api(libs.bundles.local.storage)
+    ksp(libs.androidx.room.compiler)
 }
