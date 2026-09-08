@@ -4,6 +4,8 @@ plugins {
     // hilt
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    // serialization
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -47,6 +49,8 @@ dependencies {
 
     // modules
     implementation(projects.utils)
+    implementation(projects.designsystem)
+    implementation(projects.wallet)
 
     // compose
     implementation(platform(libs.androidx.compose.bom))
@@ -84,6 +88,16 @@ dependencies {
 
     // splash screen
     implementation(libs.androidx.core.splashscreen)
+
+    // navigation2
+    implementation("androidx.navigation:navigation-compose:2.10.0")
+
+    // json searialization
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.serialization.core)
+
+    // lottie animations
+    implementation("com.airbnb.android:lottie:6.7.1")
 
 
 }

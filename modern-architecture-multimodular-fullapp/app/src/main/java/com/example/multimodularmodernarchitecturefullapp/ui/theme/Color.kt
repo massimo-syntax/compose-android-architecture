@@ -3,60 +3,61 @@ package com.example.multimodularmodernarchitecturefullapp.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // ============ PRIMARY - Bright Blue ============
-val Primary = Color(0xFF0066FF)          // Vivid Blue
+val Primary = Color(0xFF1F41BB)          // Deep Blue (Google-like)
 val OnPrimary = Color(0xFFFFFFFF)        // White text
-val PrimaryContainer = Color(0xFFE0EEFF) // Light blue bg
-val OnPrimaryContainer = Color(0xFF002366) // Dark blue text
+val PrimaryContainer = Color(0xFFDCE3FF) // Light blue bg
+val OnPrimaryContainer = Color(0xFF001159) // Dark blue text
 
-// ============ SECONDARY - Bright Teal/Turquoise ============
-val Secondary = Color(0xFF00D9D9)        // Bright Teal
-val OnSecondary = Color(0xFF000000)
-val SecondaryContainer = Color(0xFFB2F5F5) // Light teal
-val OnSecondaryContainer = Color(0xFF004D4D)
+// ============ SECONDARY - Teal (Very Trendy) ============
+val Secondary = Color(0xFF0DA5A5)        // Teal (WhatsApp-inspired)
+val OnSecondary = Color(0xFFFFFFFF)
+val SecondaryContainer = Color(0xFFA3F0F0) // Light teal
+val OnSecondaryContainer = Color(0xFF003A3A)
 
-// ============ TERTIARY - Deep Orange/Amber ============
-val Tertiary = Color(0xFFFF9800)         // Deep Orange
+// ============ TERTIARY - Coral/Peach ============
+val Tertiary = Color(0xFFFF8A50)         // Coral (Airbnb-style)
 val OnTertiary = Color(0xFFFFFFFF)
-val TertiaryContainer = Color(0xFFFFE0B2) // Light orange
-val OnTertiaryContainer = Color(0xFF663300)
+val TertiaryContainer = Color(0xFFFFDCC8) // Light coral
+val OnTertiaryContainer = Color(0xFF4D2600)
 
-// ============ ERROR - Bright Red ============
-val Error = Color(0xFFFF5252)            // Bright Red
+// ============ ERROR - Red ============
+val Error = Color(0xFFB3261E)            // Standard error red
 val OnError = Color(0xFFFFFFFF)
-val ErrorContainer = Color(0xFFFFEBEE)
-val OnErrorContainer = Color(0xFFC62828)
+val ErrorContainer = Color(0xFFF9DEDC)
+val OnErrorContainer = Color(0xFF410E0B)
 
-// ============ SUCCESS - Neon Lime Green ============
-val Success = Color(0xFF00E676)          // Neon Green
-val OnSuccess = Color(0xFF000000)
-val SuccessContainer = Color(0xFFB2FF59) // Light lime
-val OnSuccessContainer = Color(0xFF1B5E20)
+// ============ SUCCESS - Forest Green ============
+val Success = Color(0xFF059669)          // Forest Green (real-world standard)
+val OnSuccess = Color(0xFFFFFFFF)
+val SuccessContainer = Color(0xFFA7F3D0) // Light green
+val OnSuccessContainer = Color(0xFF022C1F)
 
-// ============ WARNING - Bright Amber ============
-val Warning = Color(0xFFFFC107)          // Bright Amber
-val OnWarning = Color(0xFF000000)
-val WarningContainer = Color(0xFFFFE082)
-val OnWarningContainer = Color(0xFF4D2C00)
+// ============ WARNING - Amber/Gold ============
+val Warning = Color(0xFFD97706)          // Warm amber (more modern)
+val OnWarning = Color(0xFFFFFFFF)
+val WarningContainer = Color(0xFFFFE8CC)
+val OnWarningContainer = Color(0xFF4D2600)
 
 // ============ NEUTRAL - Dark & Light ============
-val Outline = Color(0xFF6B7280)
-val OutlineVariant = Color(0xFFD1D5DB)
+val Outline = Color(0xFF79747E)
+val OutlineVariant = Color(0xFFCAC4D0)
 
 // Light Mode
-val Background = Color(0xFFFAFAFA)       // Off-white/light gray
-val OnBackground = Color(0xFF111827)    // Dark charcoal
+val Background = Color(0xFFFBF8F3)       // Warm off-white
+val OnBackground = Color(0xFF1C1B1F)    // Very dark gray
 val Surface = Color(0xFFFFFFFF)          // Pure white
-val OnSurface = Color(0xFF111827)        // Dark text
-val SurfaceVariant = Color(0xFFF3F4F6)  // Very light gray
-val OnSurfaceVariant = Color(0xFF4B5563)
+val OnSurface = Color(0xFF1C1B1F)        // Dark text
+val SurfaceVariant = Color(0xFFEFEDEB)  // Light neutral gray
+val OnSurfaceVariant = Color(0xFF49454E)
 
 // Dark Mode
-val BackgroundDark = Color(0xFF0F172A)   // Deep navy
-val OnBackgroundDark = Color(0xFFF0F9FF) // Almost white
-val SurfaceDark = Color(0xFF1E293B)      // Dark slate
-val OnSurfaceDark = Color(0xFFF1F5F9)    // Light gray text
-val SurfaceVariantDark = Color(0xFF334155) // Medium dark gray
-val OnSurfaceVariantDark = Color(0xFFCBD5E1)
+val BackgroundDark = Color(0xFF131315)   // Near black
+val OnBackgroundDark = Color(0xFFE6E1E6) // Almost white
+val SurfaceDark = Color(0xFF1C1B1F)      // Dark charcoal
+val OnSurfaceDark = Color(0xFFE6E1E6)    // Light gray text
+val SurfaceVariantDark = Color(0xFF49454E) // Medium gray
+val OnSurfaceVariantDark = Color(0xFFCAC4D0)
+
 
 // ============ ACCENT COLORS (Extra Flair) ============
 val AccentCyan = Color(0xFF00D9FF)       // Bright cyan

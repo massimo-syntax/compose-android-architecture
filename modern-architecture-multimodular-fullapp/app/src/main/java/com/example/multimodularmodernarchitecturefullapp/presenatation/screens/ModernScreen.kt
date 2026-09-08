@@ -1,4 +1,4 @@
-package com.example.multimodularmodernarchitecturefullapp
+package com.example.multimodularmodernarchitecturefullapp.presenatation.screens
 
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,6 +14,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.designsystem.presentation.BannerCard
+import com.example.designsystem.presentation.BodyLarge
+import com.example.designsystem.presentation.BodySmall
+import com.example.designsystem.presentation.ModernListItem
+import com.example.designsystem.presentation.ModernTopBar
+import com.example.designsystem.presentation.TitleLarge
+import com.example.designsystem.presentation.TitleMedium
 
 @Composable
 fun ModernScreen() {
@@ -60,15 +67,6 @@ fun ModernScreen() {
                 )
             }
 
-            item {
-                AccentBannerCard(
-                    title = "Premium Experience",
-                    subtitle = "Built with Material 3",
-                    imageUrl = "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=300&fit=crop",
-                    accentColor = MaterialTheme.colorScheme.secondary,
-                    onClick = { /* Handle click */ }
-                )
-            }
 
             // Section: Typography
             item {

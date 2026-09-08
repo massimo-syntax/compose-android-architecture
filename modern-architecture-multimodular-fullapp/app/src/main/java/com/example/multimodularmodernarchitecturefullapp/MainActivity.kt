@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.example.multimodularmodernarchitecturefullapp.navigation.AppNavGraph
+import com.example.multimodularmodernarchitecturefullapp.presenatation.screens.home.HomeScreen
 import com.example.multimodularmodernarchitecturefullapp.ui.theme.MultimodularModernArchitectureFullAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -16,7 +18,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MultimodularModernArchitectureFullAppTheme {
-                ModernScreen()
+                AppNavGraph()
             }
         }
     }
