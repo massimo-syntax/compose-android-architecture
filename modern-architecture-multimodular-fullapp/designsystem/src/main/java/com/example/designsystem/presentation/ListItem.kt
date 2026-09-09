@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -98,9 +99,9 @@ fun ModernListItem(
     }
 
     // Divider
-    Divider(
-        modifier = Modifier.padding(start = 76.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        thickness = 0.5.dp
+    HorizontalDivider(
+        modifier = Modifier.padding(start = 48.dp),
+        thickness = 0.5.dp,
+        color = MaterialTheme.colorScheme.surfaceVariant
     )
 }

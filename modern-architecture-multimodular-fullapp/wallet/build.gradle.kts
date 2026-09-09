@@ -1,8 +1,11 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
+    // hilt
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    // serialization for retrofit (json)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -29,6 +32,8 @@ android {
 dependencies {
     // modules
     implementation(projects.designsystem)
+    implementation(projects.utils)
+
 
     // compose
     implementation(platform(libs.androidx.compose.bom))
@@ -52,7 +57,16 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.junit)
+    // retrofit
+    implementation("com.squareup.retrofit2:retrofit:3.0.0")
+    // json converter factory
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+    implementation("com.squareup.retrofit2:converter-kotlinx-serialization:3.0.0")
+
+    // okhttp
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:5.5.0"))
+    // define any required OkHttp artifacts without version
+    implementation("com.squareup.okhttp3:okhttp")
+    implementation("com.squareup.okhttp3:logging-interceptor")
+
 }

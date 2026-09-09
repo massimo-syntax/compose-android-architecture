@@ -11,9 +11,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.multimodularmodernarchitecturefullapp.presenatation.screens.ModernScreen
 import com.example.multimodularmodernarchitecturefullapp.presenatation.screens.home.HomeScreen
-import com.example.wallet.presentation.screens.wallet.WalletScreen
-import com.example.wallet.presentation.screens.wallet.WalletViewModel
+import com.example.wallet.presentation.home.WalletHomeScreen
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.example.wallet.presentation.home.WalletViewModel
 
 @Composable
 fun AppNavGraph(){
@@ -40,7 +40,7 @@ fun AppNavGraph(){
             }
             composable<Screen.Wallet> {
                 val viewModel: WalletViewModel = hiltViewModel()
-                WalletScreen(
+                WalletHomeScreen(
                     viewModel = viewModel,
                     onBackClick = {
                         navController.popBackStack()
