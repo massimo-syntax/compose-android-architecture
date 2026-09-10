@@ -1,4 +1,4 @@
-package com.example.wallet.presentation.home
+package com.example.wallet.presentation.screens.home
 
 import com.example.wallet.domain.model.Coin
 

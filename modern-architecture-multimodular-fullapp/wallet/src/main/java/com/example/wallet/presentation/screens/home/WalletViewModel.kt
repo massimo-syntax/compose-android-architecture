@@ -1,4 +1,4 @@
-package com.example.wallet.presentation.home
+package com.example.wallet.presentation.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,7 +23,7 @@ class WalletViewModel @Inject constructor(
 
     init{
         viewModelScope.launch(Dispatchers.IO) {
-            getCoins()
+            //getCoins()
         }
     }
 
@@ -34,14 +34,11 @@ class WalletViewModel @Inject constructor(
                 is Resource.Loading -> { _uiState.value = WalletHomeUiState(isLoading = true) }
                 is Resource.Success -> {
                     _uiState.value = WalletHomeUiState(
-                        isLoading = false,
                         coins = result.data ?: emptyList(),
-                        error = null
                     )
                 }
                 is Resource.Error -> {
                     _uiState.value = WalletHomeUiState(
-                        isLoading = false,
                         error = result.message
                     )
                 }

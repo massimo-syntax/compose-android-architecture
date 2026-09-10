@@ -1,4 +1,4 @@
-package com.example.wallet.presentation.home
+package com.example.wallet.presentation.screens.coindetails
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,42 +10,50 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.designsystem.presentation.BodyLarge
 import com.example.designsystem.presentation.BodySmall
 import com.example.designsystem.presentation.ModernListItem
 import com.example.designsystem.presentation.ModernTopBar
+import com.example.utils.logging.AppLogger
 import com.example.wallet.R
 
 @Composable
-fun WalletHomeScreen(
-      viewModel: WalletViewModel,
-      onBackClick: () -> Unit,
+fun CoinDetailsScreen(
+    id: String,
+    viewModel: CoinDetailsViewModel = hiltViewModel(),
+    onBackClick: () -> Unit,
 ) {
+
+    LaunchedEffect(id) {
+        AppLogger.e(message = "getCoinDetails - > $id")
+        viewModel.getCoinDetails("btc-bitcoin")
+    }
+
     val uiState by viewModel.uiState.collectAsState()
 
     Column(
         Modifier.fillMaxSize()
     ) {
         ModernTopBar(
-            title = stringResource(R.string.wallet),
+            title = stringResource(R.string.wallet_detail),
             leadingIcon = Icons.AutoMirrored.Filled.ArrowBack,
             trailingIcon = null,
             onLeadingClick = onBackClick
         )
         Spacer(modifier = Modifier.height(16.dp))
-
+        BodyLarge(id)
         if(uiState.isLoading){
             BodyLarge(
                 text = "loading...",
                 color = MaterialTheme.colorScheme.secondary)
         }
-
         if(uiState.error != null){
             BodyLarge(
                 text = uiState.error.toString(),
@@ -56,23 +64,10 @@ fun WalletHomeScreen(
                 color = MaterialTheme.colorScheme.error
             )
         }
-
-        if(uiState.coins.isNotEmpty()){
-            LazyColumn{
-                items(items = uiState.coins, key = { it.id } ){
-                    ModernListItem(
-                        title = it.name,
-                        subtitle = it.symbol,
-                        leadingContent = {
-                            BodySmall(it.symbol)
-                        },
-                        trailingContent = {
-                            BodySmall(it.rank.toString())
-                        }
-                    )
-                }
-            }
+        if (uiState.coin != null){
+            BodyLarge(text = uiState.coin.toString())
         }
+
 
 
     }

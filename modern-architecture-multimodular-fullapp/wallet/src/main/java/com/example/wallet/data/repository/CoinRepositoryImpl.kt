@@ -31,8 +31,18 @@ class CoinRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getCoinById(coinId: String): Flow<Resource<CoinDetail>> {
-        TODO("Not yet implemented")
+    override suspend fun getCoinById(coinId: String): Flow<Resource<CoinDetail>> = flow {
+        try {
+            emit(Resource.Loading())
+            val coinDetial = api.getCoinDetail(coinId).toDomain()
+            emit(Resource.Success(coinDetial))
+        } catch (e: HttpException){
+            emit(Resource.Error(e.localizedMessage ?: "An unexpected error occurred" ) )
+        } catch (e: IOException){
+            emit(Resource.Error("Internet connection may be unavailable, server not reachable"))
+        } catch (e: Exception){
+            emit(Resource.Error("UNESPECTED ERROR: " + e.message.toString()))
+        }
     }
 
 

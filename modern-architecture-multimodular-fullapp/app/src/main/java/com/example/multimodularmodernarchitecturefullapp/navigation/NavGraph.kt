@@ -1,5 +1,7 @@
 package com.example.multimodularmodernarchitecturefullapp.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
@@ -11,9 +13,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.multimodularmodernarchitecturefullapp.presenatation.screens.ModernScreen
 import com.example.multimodularmodernarchitecturefullapp.presenatation.screens.home.HomeScreen
-import com.example.wallet.presentation.home.WalletHomeScreen
+import com.example.wallet.presentation.screens.home.WalletHomeScreen
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.example.wallet.presentation.home.WalletViewModel
+import androidx.navigation.toRoute
+import com.example.wallet.presentation.screens.coindetails.CoinDetailsScreen
+import com.example.wallet.presentation.screens.home.WalletViewModel
 
 @Composable
 fun AppNavGraph(){
@@ -31,20 +35,83 @@ fun AppNavGraph(){
             composable<Screen.ComponentsShowcase>{
                 ModernScreen()
             }
-            composable<Screen.HomeScreen> {
+            composable<Screen.HomeScreen>(
+
+                exitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        tween(500)
+                    )
+                },
+                popEnterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        tween(500)
+                    )
+                }
+            ) {
                 HomeScreen(
                     onNavigateToWallet = {
                         navController.navigate(Screen.Wallet)
                     }
                 )
             }
-            composable<Screen.Wallet> {
+            composable<Screen.Wallet>(
+
+                enterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        tween(500)
+                    )
+                },
+                popExitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        tween(500)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        tween(500)
+                    )
+                },
+                popEnterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        tween(500)
+                    )
+                },
+            ) {
                 val viewModel: WalletViewModel = hiltViewModel()
                 WalletHomeScreen(
                     viewModel = viewModel,
                     onBackClick = {
                         navController.popBackStack()
+                    },
+                    onNavigateToDetails = { coinId ->
+                        navController.navigate( Screen.WalletDetails(coinId))
                     }
+                )
+            }
+            composable<Screen.WalletDetails>(
+                enterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        tween(500)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        tween(500)
+                    )
+                }
+            ){ backStackEntry ->
+                val coin = backStackEntry.toRoute<Screen.WalletDetails>()
+                CoinDetailsScreen(
+                    id = coin.coinId,
+                    onBackClick = { navController.popBackStack() }
                 )
             }
         }

@@ -37,7 +37,9 @@ object WalletModule {
         httpClient.addInterceptor(httpLoggingInterceptor)
         httpClient.addInterceptor(httpLoggingInterceptor)
 
-        val converterFactory = Json.asConverterFactory(
+        val json = Json{ ignoreUnknownKeys = true }
+
+        val converterFactory = json.asConverterFactory(
             "application/json; charset=utf-8".toMediaType())
 
         return Retrofit.Builder()
