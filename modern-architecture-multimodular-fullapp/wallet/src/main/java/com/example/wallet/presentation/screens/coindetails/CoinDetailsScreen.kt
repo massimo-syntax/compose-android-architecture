@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.MaterialTheme
@@ -19,9 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.designsystem.presentation.BodyLarge
 import com.example.designsystem.presentation.BodySmall
-import com.example.designsystem.presentation.ModernListItem
 import com.example.designsystem.presentation.ModernTopBar
-import com.example.utils.logging.AppLogger
 import com.example.wallet.R
 
 @Composable
@@ -32,8 +28,7 @@ fun CoinDetailsScreen(
 ) {
 
     LaunchedEffect(id) {
-        AppLogger.e(message = "getCoinDetails - > $id")
-        viewModel.getCoinDetails("btc-bitcoin")
+        viewModel.getCoinDetails(id)
     }
 
     val uiState by viewModel.uiState.collectAsState()

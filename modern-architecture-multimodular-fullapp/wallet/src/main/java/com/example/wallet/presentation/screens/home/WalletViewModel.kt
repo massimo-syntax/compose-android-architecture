@@ -23,7 +23,7 @@ class WalletViewModel @Inject constructor(
 
     init{
         viewModelScope.launch(Dispatchers.IO) {
-            //getCoins()
+            getCoins()
         }
     }
 

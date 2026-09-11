@@ -37,7 +37,11 @@ object WalletModule {
         httpClient.addInterceptor(httpLoggingInterceptor)
         httpClient.addInterceptor(httpLoggingInterceptor)
 
-        val json = Json{ ignoreUnknownKeys = true }
+        val json = Json {
+            ignoreUnknownKeys = true
+            // when 'null' field serialize to empty array
+            coerceInputValues = true
+        }
 
         val converterFactory = json.asConverterFactory(
             "application/json; charset=utf-8".toMediaType())

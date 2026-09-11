@@ -1,5 +1,6 @@
 package com.example.wallet.presentation.screens.home
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.designsystem.presentation.BodyLarge
@@ -28,6 +30,8 @@ fun WalletHomeScreen(
       onNavigateToDetails: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    val context = LocalContext.current
 
     Column(
         Modifier.fillMaxSize()
@@ -57,20 +61,8 @@ fun WalletHomeScreen(
             )
         }
 
-        ModernListItem(
-            title = "anish",
-            subtitle = "lkjdf",
-            leadingContent = {
-                BodySmall("scr")
-            },
-            trailingContent = {
-                BodySmall("111")
-            },
-            onClick = { onNavigateToDetails("anushka") }
-        )
-
-
         if(uiState.coins.isNotEmpty()){
+            Toast.makeText(context, "repo data loaded", Toast.LENGTH_SHORT).show()
             LazyColumn{
                 items(items = uiState.coins, key = { it.id } ){
                     ModernListItem(

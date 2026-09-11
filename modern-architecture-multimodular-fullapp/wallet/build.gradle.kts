@@ -10,17 +10,26 @@ plugins {
 
 android {
     namespace = "com.example.wallet"
-    compileSdk = 35
+    compileSdk {
+        version = release(37)
+    }
 
     defaultConfig {
         minSdk = 24
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+        }
+
+        debug {
+            isMinifyEnabled = false
+        }
     }
 
     buildFeatures {
@@ -33,6 +42,7 @@ dependencies {
     // modules
     implementation(projects.designsystem)
     implementation(projects.utils)
+    implementation(projects.database)
 
 
     // compose
@@ -60,7 +70,8 @@ dependencies {
     // retrofit
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
     // json converter factory
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+    //implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+    implementation(libs.kotlinx.serialization.json)
     implementation("com.squareup.retrofit2:converter-kotlinx-serialization:3.0.0")
 
     // okhttp

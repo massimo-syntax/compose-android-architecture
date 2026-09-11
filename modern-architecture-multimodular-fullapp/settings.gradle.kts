@@ -30,3 +30,4 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 include(":wallet")
 include(":designsystem")
+include(":database")

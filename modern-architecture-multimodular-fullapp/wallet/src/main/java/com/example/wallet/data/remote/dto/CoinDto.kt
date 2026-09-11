@@ -1,6 +1,7 @@
 package com.example.wallet.data.remote.dto
 
 
+import com.example.database.local.model.CoinsEntity
 import com.example.wallet.domain.model.Coin
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -25,6 +26,18 @@ data class CoinDto(
 
 fun CoinDto.toDomain(): Coin {
     return Coin(
+        id = id,
+        isActive = isActive,
+        isNew = isNew,
+        name = name,
+        rank = rank,
+        symbol = symbol,
+        type = type
+    )
+}
+
+fun CoinDto.toEntity(): CoinsEntity {
+    return CoinsEntity(
         id = id,
         isActive = isActive,
         isNew = isNew,
