@@ -30,7 +30,6 @@ object DatabaseModule{
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DatasourceModule{
-    //@Singleton
     @Binds
     abstract fun bindLocalDataSource(impl: LocalDataSourceImpl) : LocalDataSource
 }

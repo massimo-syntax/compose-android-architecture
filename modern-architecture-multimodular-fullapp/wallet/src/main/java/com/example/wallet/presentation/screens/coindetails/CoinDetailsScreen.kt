@@ -18,7 +18,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.designsystem.presentation.BodyLarge
 import com.example.designsystem.presentation.BodySmall
 import com.example.designsystem.presentation.ModernTopBar
+import com.example.designsystem.presentation.TitleMedium
 import com.example.wallet.R
+import com.example.wallet.presentation.components.CoinDetailsHeader
 
 @Composable
 fun CoinDetailsScreen(
@@ -43,7 +45,6 @@ fun CoinDetailsScreen(
             onLeadingClick = onBackClick
         )
         Spacer(modifier = Modifier.height(16.dp))
-        BodyLarge(id)
         if(uiState.isLoading){
             BodyLarge(
                 text = "loading...",
@@ -60,7 +61,11 @@ fun CoinDetailsScreen(
             )
         }
         if (uiState.coin != null){
-            BodyLarge(text = uiState.coin.toString())
+            CoinDetailsHeader(uiState.coin!!)
+        }
+        if(uiState.ticker != null){
+            TitleMedium("Price:")
+            BodyLarge(uiState.ticker!!.price.toString())
         }
 
 

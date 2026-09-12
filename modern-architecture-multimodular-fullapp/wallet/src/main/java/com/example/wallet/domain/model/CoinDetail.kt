@@ -1,7 +1,7 @@
 package com.example.wallet.domain.model
 
-import com.example.wallet.data.remote.dto.Links
-import com.example.wallet.data.remote.dto.Tag
+import com.example.wallet.data.remote.dto.coindetails.Links
+import com.example.wallet.data.remote.dto.coindetails.Tag
 
 data class CoinDetail(
     val id: String = "",

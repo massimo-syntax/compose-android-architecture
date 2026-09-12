@@ -7,6 +7,7 @@ import com.example.wallet.data.remote.CoinApi
 import com.example.wallet.data.remote.dto.toDomain
 import com.example.wallet.domain.model.Coin
 import com.example.wallet.domain.model.CoinDetail
+import com.example.wallet.domain.model.CoinTicker
 import com.example.wallet.domain.model.toDomain
 import com.example.wallet.domain.model.toEntity
 import com.example.wallet.domain.repository.CoinRepository
@@ -51,6 +52,24 @@ class CoinRepositoryImpl @Inject constructor(
             emit(Resource.Error("Internet connection may be unavailable, server not reachable"))
         } catch (e: Exception){
             emit(Resource.Error("UNEXPECTED ERROR: " + e.message.toString()))
+        }
+    }
+
+    override suspend fun getCoinTicker(coinId: String): Resource<CoinTicker> {
+        val result = safeApiCall{ api.getCoinTicker(coinId).toDomain() }
+        return result
+    }
+
+    private suspend fun <T> safeApiCall(apiCall: suspend ()->T): Resource<T>{
+        return try {
+            val coins = apiCall()
+            Resource.Success(coins)
+        } catch (e: HttpException) {
+            Resource.Error(e.localizedMessage ?: "An unexpected error occurred")
+        } catch (e: IOException) {
+            Resource.Error("Internet connection may be unavailable, server not reachable")
+        } catch (e: Exception) {
+            Resource.Error("UNEXPECTED ERROR: ${e.message}")
         }
     }
 

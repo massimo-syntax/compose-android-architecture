@@ -1,6 +1,11 @@
 package com.example.wallet.data.remote.dto
 
 
+import com.example.wallet.data.remote.dto.coindetails.Links
+import com.example.wallet.data.remote.dto.coindetails.LinksExtended
+import com.example.wallet.data.remote.dto.coindetails.Tag
+import com.example.wallet.data.remote.dto.coindetails.Team
+import com.example.wallet.data.remote.dto.coindetails.Whitepaper
 import com.example.wallet.domain.model.CoinDetail
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

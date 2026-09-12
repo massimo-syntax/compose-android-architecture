@@ -1,4 +1,4 @@
-package com.example.wallet.data.remote.dto
+package com.example.wallet.data.remote.dto.coindetails
 
 
 import kotlinx.serialization.SerialName
