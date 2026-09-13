@@ -24,3 +24,5 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// https://tfjxgdaextargramukeq.supabase.co/rest/v1/
+

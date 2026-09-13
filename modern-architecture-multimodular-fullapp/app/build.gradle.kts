@@ -95,5 +95,12 @@ dependencies {
     // lottie animations
     implementation("com.airbnb.android:lottie:6.7.1")
 
+    //supabase
+    implementation(platform("io.github.jan-tennert.supabase:bom:3.8.0"))
+    implementation("io.github.jan-tennert.supabase:supabase-kt")
+    implementation("io.github.jan-tennert.supabase:postgrest-kt")
+    // ktor used from supabase
+    implementation("io.ktor:ktor-client-android:3.5.2")
+
 
 }
