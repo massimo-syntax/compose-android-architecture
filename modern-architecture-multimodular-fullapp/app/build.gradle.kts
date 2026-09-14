@@ -50,6 +50,7 @@ dependencies {
     implementation(projects.utils)
     implementation(projects.designsystem)
     implementation(projects.wallet)
+    implementation(projects.upcoming)
 
     // compose
     implementation(platform(libs.androidx.compose.bom))

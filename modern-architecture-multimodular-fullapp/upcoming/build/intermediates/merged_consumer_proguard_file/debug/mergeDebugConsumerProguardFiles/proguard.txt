@@ -1,0 +1,2 @@
+-keep,allowobfuscation,allowshrinking class com.example.upcoming.presentation.screens.UpcomingViewModel
+-keep,allowobfuscation,allowshrinking class com.example.upcoming.presentation.screens.UpcomingViewModel
