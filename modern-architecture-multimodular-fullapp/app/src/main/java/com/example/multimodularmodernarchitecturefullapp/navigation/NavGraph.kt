@@ -20,6 +20,8 @@ import com.example.wallet.presentation.screens.coindetails.CoinDetailsScreen
 import com.example.wallet.presentation.screens.home.WalletViewModel
 import com.example.upcoming.presentation.screens.UpcomingScreen
 import com.example.upcoming.presentation.screens.UpcomingViewModel
+import com.example.weather.presentation.screens.weather.WeatherScreen
+import com.example.weather.presentation.screens.address.SelectLocation
 
 @Composable
 fun AppNavGraph(){
@@ -58,8 +60,13 @@ fun AppNavGraph(){
                     },
                     onNavigateToUpcoming = {
                         navController.navigate(Screen.Upcoming)
-                    }
-
+                    },
+                    onNavigateToWeather = {
+                        navController.navigate(Screen.Weather)
+                    },
+                    onNavigateToChangeAddress = {
+                        navController.navigate(Screen.SelectLocation)
+                    },
                 )
             }
             composable<Screen.Upcoming>(
@@ -139,6 +146,42 @@ fun AppNavGraph(){
                 val coin = backStackEntry.toRoute<Screen.WalletDetails>()
                 CoinDetailsScreen(
                     id = coin.coinId,
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+            composable<Screen.Weather>(
+                enterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        tween(500)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        tween(500)
+                    )
+                }
+            ){
+                WeatherScreen(
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+            composable<Screen.SelectLocation>(
+                enterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        tween(500)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        tween(500)
+                    )
+                }
+            ){
+                SelectLocation(
                     onBackClick = { navController.popBackStack() }
                 )
             }

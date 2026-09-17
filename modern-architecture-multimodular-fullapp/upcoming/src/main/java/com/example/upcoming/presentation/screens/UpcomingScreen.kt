@@ -1,5 +1,7 @@
 package com.example.upcoming.presentation.screens
 
+import com.example.upcoming.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,7 +32,7 @@ fun UpcomingScreen(
         Modifier.fillMaxSize()
     ) {
         ModernTopBar(
-            title = "Upcoming",
+            title = stringResource(R.string.upcoming),
             leadingIcon = Icons.AutoMirrored.Filled.ArrowBack,
             trailingIcon = null,
             onLeadingClick = onBackClick

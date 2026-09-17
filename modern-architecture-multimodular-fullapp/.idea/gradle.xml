@@ -15,6 +15,7 @@
             <option value="$PROJECT_DIR$/upcoming" />
             <option value="$PROJECT_DIR$/utils" />
             <option value="$PROJECT_DIR$/wallet" />
+            <option value="$PROJECT_DIR$/weather" />
           </set>
         </option>
       </GradleProjectSettings>

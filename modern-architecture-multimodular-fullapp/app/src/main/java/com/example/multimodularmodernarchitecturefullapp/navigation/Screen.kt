@@ -16,11 +16,19 @@ sealed class Screen(val route: String){
     @Serializable
     data class WalletDetails(val coinId: String) : Screen(Route.WALLET_DETAILS.name)
 
+    @Serializable
+    data object Weather : Screen(Route.WEATHER.name)
+
+    @Serializable
+    data object SelectLocation : Screen(Route.SELECT_LOCATION.name)
+
 }
 
 enum class Route{
     HOME,
     WALLET_HOME,
     WALLET_DETAILS,
-    UPCOMING
+    UPCOMING,
+    WEATHER,
+    SELECT_LOCATION,
 }
