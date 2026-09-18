@@ -43,7 +43,7 @@ fun HomeScreen(
     ) {
         // Modern Top Bar
         ModernTopBar(
-            title = "Address",
+            title = uiState.selectedLocation ?: "No selected Location",
             leadingIcon = Icons.Filled.Adb,
             trailingIcon = Icons.Default.BuildCircle,
             onLeadingClick = { /* Handle back */ },

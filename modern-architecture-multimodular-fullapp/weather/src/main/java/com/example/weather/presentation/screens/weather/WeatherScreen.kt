@@ -22,7 +22,6 @@ import com.example.designsystem.presentation.BodyLarge
 import com.example.designsystem.presentation.ModernListItem
 import com.example.designsystem.presentation.ModernTopBar
 import com.example.weather.R
-import com.example.weather.presentation.screens.WeatherViewModel
 
 @Composable
 fun WeatherScreen(

@@ -5,6 +5,8 @@ import com.example.database.local.AppDatabase
 import com.example.database.local.dao.CoinsDao
 import com.example.database.local.datasource.LocalDataSource
 import com.example.database.local.datasource.LocalDataSourceImpl
+import com.example.database.preferences.datasource.PreferencesDatasource
+import com.example.database.preferences.datasource.PreferencesDatasourceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -32,4 +34,7 @@ object DatabaseModule{
 abstract class DatasourceModule{
     @Binds
     abstract fun bindLocalDataSource(impl: LocalDataSourceImpl) : LocalDataSource
+
+    @Binds
+    abstract fun bindPreferencesDataSource(impl: PreferencesDatasourceImpl) : PreferencesDatasource
 }

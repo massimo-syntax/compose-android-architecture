@@ -21,8 +21,10 @@ import com.example.wallet.presentation.screens.home.WalletViewModel
 import com.example.upcoming.presentation.screens.UpcomingScreen
 import com.example.upcoming.presentation.screens.UpcomingViewModel
 import com.example.weather.presentation.screens.weather.WeatherScreen
-import com.example.weather.presentation.screens.address.SelectLocation
+import com.example.weather.presentation.screens.address.SelectLocationScreen
 
+
+private const val DURATION = 250
 @Composable
 fun AppNavGraph(){
     val navController = rememberNavController()
@@ -40,17 +42,16 @@ fun AppNavGraph(){
                 ModernScreen()
             }
             composable<Screen.HomeScreen>(
-
                 exitTransition = {
                     slideOutOfContainer(
                         AnimatedContentTransitionScope.SlideDirection.Left,
-                        tween(500)
+                        tween(DURATION)
                     )
                 },
                 popEnterTransition = {
                     slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.Right,
-                        tween(500)
+                        tween(DURATION)
                     )
                 }
             ) {
@@ -73,13 +74,13 @@ fun AppNavGraph(){
                 enterTransition = {
                     slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.Left,
-                        tween(500)
+                        tween(DURATION)
                     )
                 },
                 popExitTransition = {
                     slideOutOfContainer(
                         AnimatedContentTransitionScope.SlideDirection.Right,
-                        tween(500)
+                        tween(DURATION)
                     )
                 }
             ) {
@@ -96,25 +97,25 @@ fun AppNavGraph(){
                 enterTransition = {
                     slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.Left,
-                        tween(500)
+                        tween(DURATION)
                     )
                 },
                 popExitTransition = {
                     slideOutOfContainer(
                         AnimatedContentTransitionScope.SlideDirection.Right,
-                        tween(500)
+                        tween(DURATION)
                     )
                 },
                 exitTransition = {
                     slideOutOfContainer(
                         AnimatedContentTransitionScope.SlideDirection.Left,
-                        tween(500)
+                        tween(DURATION)
                     )
                 },
                 popEnterTransition = {
                     slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.Right,
-                        tween(500)
+                        tween(DURATION)
                     )
                 },
             ) {
@@ -133,13 +134,13 @@ fun AppNavGraph(){
                 enterTransition = {
                     slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.Left,
-                        tween(500)
+                        tween(DURATION)
                     )
                 },
                 exitTransition = {
                     slideOutOfContainer(
                         AnimatedContentTransitionScope.SlideDirection.Right,
-                        tween(500)
+                        tween(DURATION)
                     )
                 }
             ){ backStackEntry ->
@@ -153,13 +154,13 @@ fun AppNavGraph(){
                 enterTransition = {
                     slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.Left,
-                        tween(500)
+                        tween(DURATION)
                     )
                 },
                 exitTransition = {
                     slideOutOfContainer(
                         AnimatedContentTransitionScope.SlideDirection.Right,
-                        tween(500)
+                        tween(DURATION)
                     )
                 }
             ){
@@ -171,17 +172,17 @@ fun AppNavGraph(){
                 enterTransition = {
                     slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.Left,
-                        tween(500)
+                        tween(DURATION)
                     )
                 },
                 exitTransition = {
                     slideOutOfContainer(
                         AnimatedContentTransitionScope.SlideDirection.Right,
-                        tween(500)
+                        tween(DURATION)
                     )
                 }
             ){
-                SelectLocation(
+                SelectLocationScreen(
                     onBackClick = { navController.popBackStack() }
                 )
             }

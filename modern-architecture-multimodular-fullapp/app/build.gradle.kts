@@ -52,6 +52,7 @@ dependencies {
     implementation(projects.wallet)
     implementation(projects.upcoming)
     implementation(projects.weather)
+    implementation(projects.database)
 
     // compose
     implementation(platform(libs.androidx.compose.bom))

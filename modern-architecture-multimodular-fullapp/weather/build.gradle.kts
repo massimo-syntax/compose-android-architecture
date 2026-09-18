@@ -42,6 +42,7 @@ dependencies {
     // modules
     implementation(projects.designsystem)
     implementation(projects.utils)
+    implementation(projects.database)
 
     // compose
     implementation(platform(libs.androidx.compose.bom))

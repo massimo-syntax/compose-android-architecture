@@ -42,6 +42,9 @@ dependencies {
     implementation("androidx.room3:room3-runtime:3.0.3")
     ksp("androidx.room3:room3-compiler:3.0.3")
 
+    // datastore
+    implementation("androidx.datastore:datastore-preferences:1.2.1")
+
     // hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)

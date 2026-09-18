@@ -44,19 +44,16 @@ import com.example.designsystem.presentation.ModernTopBar
 import com.example.weather.R
 
 @Composable
-fun SelectLocation(
+fun SelectLocationScreen(
     viewModel: LocationViewModel = hiltViewModel(),
     onBackClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    
-    // Saves the current selected city as a string from the name when selected
-    var selectedCity by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
             ModernTopBar(
-                title = stringResource(R.string.weather),
+                title = uiState.selectedLocation ?: "No Location Selected",
                 leadingIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 trailingIcon = null,
                 onLeadingClick = onBackClick
@@ -103,7 +100,7 @@ fun SelectLocation(
                 )
             }
 
-            if (uiState.items.isNotEmpty()) {
+            if (uiState.locations.isNotEmpty()) {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
                     contentPadding = PaddingValues(16.dp),
@@ -111,8 +108,8 @@ fun SelectLocation(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(uiState.items, key = { it.name }) { item ->
-                        val isSelected = selectedCity == item.name
+                    items(uiState.locations, key = { it.name }) { city ->
+                        val isSelected = uiState.selectedLocation == city.name
                         
                         // Animates color when selected
                         val backgroundColor by animateColorAsState(
@@ -124,7 +121,7 @@ fun SelectLocation(
                         Surface(
                             onClick = {
                                 // Toggled on click
-                                selectedCity = if (isSelected) null else item.name
+                                viewModel.event(LocationUiEvent.CityItemClicked(city.name))
                             },
                             modifier = Modifier.aspectRatio(1f),
                             shape = RoundedCornerShape(8.dp),
@@ -145,7 +142,7 @@ fun SelectLocation(
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = item.name,
+                                    text = city.name,
                                     style = MaterialTheme.typography.bodyMedium,
                                     textAlign = TextAlign.Center
                                 )

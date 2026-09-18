@@ -5,5 +5,6 @@ import com.example.upcoming.domain.model.Upcoming
 data class HomeUiState(
     val loading: Boolean = false,
     val error: String? = null,
-    val nextUpcoming: Upcoming? = null
+    val nextUpcoming: Upcoming? = null,
+    val selectedLocation: String? = null
 )
