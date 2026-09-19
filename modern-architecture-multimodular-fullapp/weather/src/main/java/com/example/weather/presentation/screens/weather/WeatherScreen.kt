@@ -61,16 +61,14 @@ fun WeatherScreen(
                 )
             }
 
-            if (uiState.items.isNotEmpty()) {
-                LazyColumn {
-                    items(items = uiState.items, key = { it.id }) { item ->
-                        ModernListItem(
-                            title = item.name,
-                            subtitle = "",
-                            onClick = { /* Handle click if needed */ }
-                        )
-                    }
-                }
+            if (!uiState.city.isNullOrEmpty()) {
+                BodyLarge(uiState.city ?: "it was null")
+            }
+            if(uiState.coordinates != null){
+                val lat = uiState.coordinates?.lat ?: "it was null"
+                val lon = uiState.coordinates?.lon ?: "it was null"
+                BodyLarge("Lat: $lat")
+                BodyLarge("Lon: $lon")
             }
         }
     }
