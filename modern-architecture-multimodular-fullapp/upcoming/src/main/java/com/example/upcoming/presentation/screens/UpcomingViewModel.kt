@@ -26,13 +26,14 @@ class UpcomingViewModel @Inject constructor(
 
     fun getUpcoming() {
         viewModelScope.launch {
-            _uiState.update { it.copy(loading = true) }
+            _uiState.value = UpcomingUiState(loading = true)
             try {
                 val items = repository.getUpcomingItems()
                 val sortedItems = items.sortedBy { dateToMillis(it.date) }
-                _uiState.update { it.copy(loading = false, items = sortedItems) }
+                _uiState.value = UpcomingUiState(items = sortedItems)
             } catch (e: Exception) {
-                _uiState.update { it.copy(loading = false, error = e.message) }
+                _uiState.value = UpcomingUiState(error = e.message)
+
             }
         }
     }

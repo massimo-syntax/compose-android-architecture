@@ -6,6 +6,7 @@ import com.example.database.preferences.datasource.PreferencesDatasource
 import com.example.utils.Resource
 import com.example.weather.domain.model.Coordinates
 import com.example.weather.domain.repository.LocationRepository
+import com.example.weather.domain.usecase.GetWeatherByCityNameUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
     private val repository: LocationRepository,
+    private val weatherByCityName: GetWeatherByCityNameUseCase,
     private val preferences: PreferencesDatasource
 ) : ViewModel() {
 
@@ -48,8 +50,18 @@ class WeatherViewModel @Inject constructor(
                 )}
             }else{
                 _uiState.update { it.copy(
-                    error = "Error fetching data for city: $city"
+                    error = "Error fetching coordinates for city: $city"
                 ) }
+            }
+            val weather = weatherByCityName(city)
+            if( weather is Resource.Success){
+                _uiState.update {it.copy(
+                    weather = weather.data
+                )}
+            }else{
+                _uiState.update {it.copy(
+                    error = "error fetching weather viewmodel"
+                )}
             }
         }
     }

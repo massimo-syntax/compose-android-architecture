@@ -4,8 +4,10 @@ import com.example.database.preferences.datasource.PreferencesDatasource
 import com.example.utils.Resource
 import com.example.weather.data.remote.WeatherAPI
 import com.example.weather.data.remote.dto.citynamecoordinates.toDomain
+import com.example.weather.data.remote.dto.weather.toDomain
 import com.example.weather.domain.model.Coordinates
 import com.example.weather.domain.model.Location
+import com.example.weather.domain.model.Weather
 import com.example.weather.domain.repository.LocationRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -33,7 +35,6 @@ val locations = listOf(
 
 @Singleton
 class LocationRepositoryImpl @Inject constructor(
-    private val preferences: PreferencesDatasource,
     private val locationApi: WeatherAPI
 ) : LocationRepository {
 
@@ -43,9 +44,6 @@ class LocationRepositoryImpl @Inject constructor(
         emit(Resource.Success(locations))
     }
 
-    override fun selectLocation(location: String?) {
-        TODO("Not yet implemented")
-    }
 
     // the lat long is not saved in datastore
     // so we have fun requesting them as well
@@ -54,6 +52,17 @@ class LocationRepositoryImpl @Inject constructor(
             val response = locationApi.getCoordinatesByCityName(name)
             val locationData = response.toDomain()
             Resource.Success(locationData)
+        }catch (e: Exception){
+            Resource.Error(e.localizedMessage ?: "unknown error by query location")
+        }
+
+    override suspend fun getWeatherByCoordinates(
+        lat: Double,
+        lon: Double
+    ): Resource<Weather> =
+        try{
+            val weather = locationApi.getWeatherByCoordinates(lat, lon)
+            Resource.Success(weather.toDomain())
         }catch (e: Exception){
             Resource.Error(e.localizedMessage ?: "unknown error by query location")
         }

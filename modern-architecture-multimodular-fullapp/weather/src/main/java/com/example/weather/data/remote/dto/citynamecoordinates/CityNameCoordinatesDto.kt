@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CityNameCoordinates(
+data class CityNameCoordinatesDto(
     @SerialName("query")
     val query: String = "",
     @SerialName("results")
@@ -16,7 +16,7 @@ data class CityNameCoordinates(
 
 
 
-fun CityNameCoordinates.toDomain() =
+fun CityNameCoordinatesDto.toDomain() =
     Coordinates(
         cityName = results[0].name,
         lat = results[0].latitude,

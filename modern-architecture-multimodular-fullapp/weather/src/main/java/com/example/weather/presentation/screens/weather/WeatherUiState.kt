@@ -11,6 +11,3 @@ data class WeatherUiState(
     val error: String? = null
 )
 
-private data class Weather(
-    val weather: String = "Raining with sun"
-)

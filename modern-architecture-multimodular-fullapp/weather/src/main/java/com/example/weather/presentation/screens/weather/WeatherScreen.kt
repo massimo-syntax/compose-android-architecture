@@ -70,6 +70,16 @@ fun WeatherScreen(
                 BodyLarge("Lat: $lat")
                 BodyLarge("Lon: $lon")
             }
+
+            if(uiState.weather != null){
+                val weather = uiState.weather
+                val condition = weather?.condition
+                val temperature = weather?.temperatureC
+                val isDay = weather?.isDay
+                BodyLarge("Condition: $condition")
+                BodyLarge("Temperature: $temperature")
+                BodyLarge("Is Day $isDay")
+            }
         }
     }
 }
