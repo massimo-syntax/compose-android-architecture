@@ -15,7 +15,6 @@ interface WeatherAPI {
     ) : CityNameCoordinatesDto
 
     @GET("/api/v1/weather/current?")
-
     suspend fun getWeatherByCoordinates(
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,

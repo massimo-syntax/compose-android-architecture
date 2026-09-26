@@ -60,14 +60,14 @@ fun HomeScreen(
 
             if(uiState.loading) CircularProgressIndicator(Modifier.size(100.dp))
 
-            uiState.nextUpcoming?.let{
+           //uiState.nextUpcoming?.let{
                 BannerCard(
-                    title = it.name,
-                    subtitle = it.description ?: "",
+                    title = uiState.nextUpcoming?.name.toString(),//it.name,
+                    subtitle = uiState.nextUpcoming?.description.toString(),//it.description ?: "",
                     imageUrl = "https://static.vecteezy.com/system/resources/thumbnails/047/664/958/small_2x/a-small-yellow-duck-on-a-transparent-background-png.png",
                     onClick = onNavigateToUpcoming
                 )
-            }
+            //}
 
             BannerCard(
                 title = stringResource(WalletR.string.wallet),
@@ -76,12 +76,15 @@ fun HomeScreen(
                 onClick = onNavigateToWallet
             )
 
-            BannerCard(
-                title = stringResource(WeatherR.string.weather),
-                subtitle = "See the weather in your region",
-                imageUrl = "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:format(webp):quality(75)/2023_11_26_638366159843367754_hinh-nen-bien.png",
-                onClick = onNavigateToWeather
-            )
+            uiState.weather?.let {
+                BannerCard(
+                    title = "${it.temperatureC} °C",
+                    subtitle = it.condition,
+                    imageUrl = "https://cdn2.fptshop.com.vn/unsafe/1920x0/filters:format(webp):quality(75)/2023_11_26_638366159843367754_hinh-nen-bien.png",
+                    onClick = onNavigateToWeather
+                )
+            }
+
 
 
 

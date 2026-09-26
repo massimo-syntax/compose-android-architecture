@@ -35,7 +35,7 @@ object WeatherModule {
         }
 
         httpClient.addInterceptor(httpLoggingInterceptor)
-        httpClient.addInterceptor(httpLoggingInterceptor)
+        httpClient.addInterceptor(myInterceptor)
 
         val json = Json {
             ignoreUnknownKeys = true
