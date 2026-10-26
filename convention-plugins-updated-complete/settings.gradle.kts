@@ -1,3 +1,5 @@
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 pluginManagement {
     includeBuild("build-logic")
     repositories {
@@ -25,3 +27,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "ConventionPluginsUpdatedComplete"
 include(":app")
+include(":core:domain")
+include(":myfeature")

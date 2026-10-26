@@ -173,7 +173,8 @@ internal inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() 
         is KotlinJvmProjectExtension -> compilerOptions
         else -> throw Exception("Unsupported Kotlin project type")
     }.apply {
-        jvmTarget.set(JvmTarget.JVM_11)
+        jvmToolchain(17)
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 ```
@@ -235,12 +236,32 @@ internal fun Project.configureAndroid(
 }
 ```
 
-## Now is possible to create the convention plugins
+## Now it is possible to create the convention plugins
+
+---
+
+-**Useful info: applying**
+```kotlin
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+```
+
+in the project root settings.gradle.kts, enables to access the modules by type safe decalration instead of string
+```kotlin
+    implementation(project.core.domain)
+    implementation(project.myfeature)
+    //  instead of
+    implementation(project(":core:domain"))
+    implementation(project(":myfeature"))
+```
+
+---
+
 
 #### Create Convention Plugins in `conventionPlugins` Package
+
 Now that the infrastructure and extensions are ready, convention plugins can be created in `build-logic/convention/src/main/kotlin/conventionPlugins/`:
 
-### Application Convention Plugin (`ApplicationConventionPlugin.kt`)
+## Application Convention Plugin (`ApplicationConventionPlugin.kt`)
 Create `ApplicationConventionPlugin.kt` inside `build-logic/convention/src/main/kotlin/conventionPlugins/`:
 
 ```kotlin
@@ -260,8 +281,8 @@ class ApplicationConventionPlugin : Plugin<Project> {
         with(target) {
             val libs = the<LibrariesForLibs>()
             apply(plugin = libs.plugins.android.application.get().pluginId)
-           // no longer needed, after agp 9. 
-           //apply(plugin = libs.plugins.kotlin.android.get().pluginId)
+            // No longer needed after AGP 9:
+            // apply(plugin = libs.plugins.kotlin.android.get().pluginId)
 
             val extension = extensions.getByType<ApplicationExtension>()
             configureAndroid(extension)
@@ -269,9 +290,19 @@ class ApplicationConventionPlugin : Plugin<Project> {
     }
 }
 ```
-And bind it in the :convention build.gradle.kts
-- notice the path -> conventionPlugins.ApplicationConventionPlugin
-   that is the pacage inside src/main/kotlin
+
+And bind it in `build-logic/convention/build.gradle.kts`:
+- Notice the implementation class path: `conventionPlugins.ApplicationConventionPlugin` (this corresponds to the package inside `src/main/kotlin`).
+
+In the `gradle/libs.versions.toml` file, add the plugin definition under `[plugins]`:
+
+```toml
+[plugins]
+# ...
+application = { id = "convention.plugin.application" }
+```
+
+Register the plugin in `build-logic/convention/build.gradle.kts`:
 
 ```kotlin
 gradlePlugin {
@@ -285,4 +316,405 @@ gradlePlugin {
     }
 }
 ```
+
+### Apply Convention Plugin in `:app` Module (`app/build.gradle.kts`)
+
+Now the convention plugin can replace the default Android application plugin in `app/build.gradle.kts`:
+
+```kotlin
+plugins {
+    // Replace default plugin:
+    // alias(libs.plugins.android.application)
+    alias(libs.plugins.application) // our plugin
+    ...
+}
+```
+
+By applying the convention plugin, redundant configurations in the `:app` module can be removed because the convention plugin already configures:
+- Java compile options via `configureJavaAndroid`:
+  ```kotlin
+  commonExtension.apply {
+      compileOptions.sourceCompatibility = javaVersion
+      compileOptions.targetCompatibility = javaVersion
+  }
+  ```
+- Default SDK configurations via `configureAndroid`:
+  ```kotlin
+  commonExtension.apply {
+      compileSdk = 37
+      defaultConfig.minSdk = 24
+      ...
+      defaultConfig.targetSdk = 37
+      
+  }
+  ```
+
+With the new plugin applied, those configurations can be removed from the `android {}` block in `app/build.gradle.kts`:
+
+```kotlin
+android {
+    namespace = "com.example.conventionpluginsupdatedcomplete"
+
+    defaultConfig {
+        applicationId = "com.example.conventionpluginsupdatedcomplete"
+        versionCode = 1
+        versionName = "1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        ...
+    }
+
+    buildFeatures {
+        compose = true
+    }
+}
+```
+---
+## Library Convention Plugin (`LibraryConventionPlugin.kt`)
+*(Used for Android library modules)*
+
+### Step 1: Create `LibraryConventionPlugin.kt`
+Create `LibraryConventionPlugin.kt` inside `build-logic/convention/src/main/kotlin/conventionPlugins/`:
+
+```kotlin
+package conventionPlugins
+
+import com.android.build.api.dsl.LibraryExtension
+import extensions.configureAndroid
+import org.gradle.accessors.dm.LibrariesForLibs
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.the
+
+class LibraryConventionPlugin : Plugin<Project> {
+    override fun apply(target: Project) {
+        with(target) {
+            val libs = the<LibrariesForLibs>()
+            apply(plugin = libs.plugins.android.library.get().pluginId)
+            // No longer needed after AGP 9:
+            // apply(plugin = libs.plugins.kotlin.android.get().pluginId)
+
+            val extension = extensions.getByType<LibraryExtension>()
+            configureAndroid(extension)
+        }
+    }
+}
+```
+
+### Step 2: Define Plugin ID in Version Catalog (`gradle/libs.versions.toml`)
+Add the library convention plugin under `[plugins]`:
+
+```toml
+[plugins]
+# ...
+library = { id = "convetion.plugin.library" }
+```
+
+### Step 3: Register Plugin in `:convention` (`build-logic/convention/build.gradle.kts`)
+Register the plugin inside the `gradlePlugin` block
+
+```kotlin
+gradlePlugin {
+    plugins {
+        // ...
+        register("androidLibrary") {
+            id = libs.plugins.library.get().pluginId
+            implementationClass = "conventionPlugins.LibraryConventionPlugin"
+        }
+    }
+}
+```
+
+### Step 4: Apply in Library Modules
+In any library module's `build.gradle.kts`, apply the custom convention plugin in place of the default Android library plugin:
+All defined configurations in our plugin can be removed from the gradle file
+```kotlin
+plugins {
+    alias(libs.plugins.android.library) // remove
+    alias(libs.plugins.library)
+}
+// remove entire block
+compileSdk {
+    version = release(37)
+}
+
+defaultConfig {
+    minSdk = 24 // remove
+
+    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+}
+
+// remove entire
+compileOptions {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+```
+
+
+---
+
+## Pure Kotlin Convention Plugin (`JvmConventionPlugin.kt`)
+*(Used by pure JVM/Kotlin modules—for example, domain modules containing use cases, repository interfaces, and models)*
+
+### Step 1: Create `JvmConventionPlugin.kt`
+Create `JvmConventionPlugin.kt` inside `build-logic/convention/src/main/kotlin/conventionPlugins/`:
+
+```kotlin
+package conventionPlugins
+
+import extensions.configureJavaJvm
+import extensions.configureKotlin
+import org.gradle.accessors.dm.LibrariesForLibs
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.the
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
+
+class JvmConventionPlugin : Plugin<Project> {
+    override fun apply(target: Project) {
+        with(target) {
+            val libs = the<LibrariesForLibs>()
+            apply(plugin = libs.plugins.kotlin.jvm.get().pluginId)
+
+            configureJavaJvm()
+            configureKotlin<KotlinJvmProjectExtension>()
+        }
+    }
+}
+```
+
+### Step 2: Define Plugin ID in Version Catalog (`gradle/libs.versions.toml`)
+Add the pure Kotlin convention plugin under `[plugins]`:
+
+```toml
+[plugins]
+# ...
+convention-jvm = { id = "convetion.plugin.kotlin.jvm" }
+```
+
+### Step 3: Register Plugin in `:convention` (`build-logic/convention/build.gradle.kts`)
+Register the plugin inside the `gradlePlugin` block:
+
+```kotlin
+gradlePlugin {
+    plugins {
+        // ...
+        register("jvmKotlin") {
+            id = libs.plugins.convention.jvm.get().pluginId
+            implementationClass = "conventionPlugins.JvmConventionPlugin"
+        }
+    }
+}
+```
+
+### Step 4: Apply in Pure Kotlin Modules
+In any pure Kotlin module's `build.gradle.kts`, apply the custom convention plugin in place of `kotlin("jvm")`:
+In the convention plugin is already defined what can be deleted from the module gradle file
+```kotlin
+plugins {
+    id("java-library") // remove
+    alias(libs.plugins.kotlin.jvm) // remove
+    alias(libs.plugins.convention.jvm) // our convention plugin
+}
+// remove whole
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+// remove as well the whole
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+    }
+}
+```
+---
+
+## Configuration of Compose in Convention Plugins
+
+### Common Compose Extension (`ConfigureCompose.kt`)
+The common extension helper can be used by convention plugins to configure Jetpack Compose dependencies and build features.
+
+Create `ConfigureCompose.kt` inside `build-logic/convention/src/main/kotlin/extensions/`:
+
+```kotlin
+package extensions
+
+import com.android.build.api.dsl.CommonExtension
+import org.gradle.accessors.dm.LibrariesForLibs
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.the
+
+internal fun Project.configureCompose(
+    commonExtension: CommonExtension,
+) {
+    val libs = the<LibrariesForLibs>()
+
+    commonExtension.apply {
+        buildFeatures.compose = true
+
+        dependencies {
+            "implementation"(platform(libs.androidx.compose.bom))
+            "implementation"(libs.androidx.compose.ui)
+            "implementation"(libs.androidx.compose.ui.graphics)
+            "implementation"(libs.androidx.compose.ui.tooling.preview)
+            "implementation"(libs.androidx.compose.material3)
+            "androidTestImplementation"(platform(libs.androidx.compose.bom))
+            "androidTestImplementation"(libs.androidx.compose.ui.test.junit4)
+            "debugImplementation"(libs.androidx.compose.ui.tooling)
+            "debugImplementation"(libs.androidx.compose.ui.test.manifest)
+        }
+    }
+}
+```
+
+### Application Compose Convention Plugin (`ComposeApplicationConventionPlugin.kt`)
+*(Used for Android application modules requiring Jetpack Compose)*
+
+#### Step 1: Create `ComposeApplicationConventionPlugin.kt`
+Create `ComposeApplicationConventionPlugin.kt` inside `build-logic/convention/src/main/kotlin/conventionPlugins/`:
+
+```kotlin
+package conventionPlugins
+
+import com.android.build.api.dsl.ApplicationExtension
+import extensions.configureCompose
+import org.gradle.accessors.dm.LibrariesForLibs
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.the
+
+class ComposeApplicationConventionPlugin : Plugin<Project> {
+    override fun apply(target: Project) {
+        with(target) {
+            val libs = the<LibrariesForLibs>()
+            apply(plugin = libs.plugins.kotlin.compose.get().pluginId)
+
+            val extension = extensions.getByType<ApplicationExtension>()
+            configureCompose(extension)
+
+            dependencies {
+                "implementation"(libs.androidx.activity.compose)
+            }
+        }
+    }
+}
+```
+
+#### Step 2: Define Plugin ID in Version Catalog (`gradle/libs.versions.toml`)
+Add the application compose convention plugin under `[plugins]`:
+
+```toml
+[plugins]
+# ...
+applicationCompose = { id = "convetion.plugin.application.compose" }
+```
+
+#### Step 3: Register Plugin in `:convention` (`build-logic/convention/build.gradle.kts`)
+Register the plugin inside the `gradlePlugin` block:
+
+```kotlin
+gradlePlugin {
+    plugins {
+        // ...
+        register("androidApplicationCompose") {
+            id = libs.plugins.applicationCompose.get().pluginId
+            implementationClass = "conventionPlugins.ComposeApplicationConventionPlugin"
+        }
+    }
+}
+```
+
+#### Step 4: Apply in Application Module (`app/build.gradle.kts`)
+In `app/build.gradle.kts`, apply the custom application compose plugin alongside the base application plugin:
+
+```kotlin
+plugins {
+    alias(libs.plugins.application)
+    alias(libs.plugins.applicationCompose)
+}
+```
+
+All Compose dependencies provided by the convention plugin and its extension, as well as the build feature for compose `buildFeatures { compose = true }`, can now be safely removed from `app/build.gradle.kts` (or any application module).
+
+---
+
+### Library Compose Convention Plugin (`ComposeLibraryConventionPlugin.kt`)
+*(Used for Android library modules requiring Jetpack Compose)*
+
+#### Step 1: Create `ComposeLibraryConventionPlugin.kt`
+Create `ComposeLibraryConventionPlugin.kt` inside `build-logic/convention/src/main/kotlin/conventionPlugins/`:
+
+```kotlin
+package conventionPlugins
+
+import com.android.build.api.dsl.LibraryExtension
+import extensions.configureCompose
+import org.gradle.accessors.dm.LibrariesForLibs
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.the
+
+class ComposeLibraryConventionPlugin : Plugin<Project> {
+    override fun apply(target: Project) {
+        with(target) {
+            val libs = the<LibrariesForLibs>()
+            apply(plugin = libs.plugins.kotlin.compose.get().pluginId)
+
+            val extension = extensions.getByType<LibraryExtension>()
+            configureCompose(extension)
+        }
+    }
+}
+```
+
+#### Step 2: Define Plugin ID in Version Catalog (`gradle/libs.versions.toml`)
+Add the library compose convention plugin under `[plugins]`:
+
+```toml
+[plugins]
+# ...
+libraryCompose = { id = "convetion.plugin.library.compose" }
+```
+
+#### Step 3: Register Plugin in `:convention` (`build-logic/convention/build.gradle.kts`)
+Register the plugin inside the `gradlePlugin` block:
+
+```kotlin
+gradlePlugin {
+    plugins {
+        // ...
+        register("androidLibraryCompose") {
+            id = libs.plugins.libraryCompose.get().pluginId
+            implementationClass = "conventionPlugins.ComposeLibraryConventionPlugin"
+        }
+    }
+}
+```
+
+#### Step 4: Apply in Library Modules (`build.gradle.kts`)
+In any library module requiring Compose, apply the custom library compose plugin alongside the base library plugin:
+
+```kotlin
+plugins {
+    alias(libs.plugins.library)
+    alias(libs.plugins.libraryCompose)
+}
+```
+Now everything about compose, all the libraries and build feature, are not needed in the module
+
+---
 

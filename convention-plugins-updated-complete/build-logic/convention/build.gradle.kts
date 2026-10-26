@@ -25,12 +25,6 @@ dependencies {
 
     // To allow getting version catalog references in convention plugins
     implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
-
-    // if that does not work:
-    //gradle.serviceOf<DependenciesAccessors>().classes.asFiles.forEach {
-    //    compileOnly(files(it.absolutePath))
-    //}
-
 }
 
 gradlePlugin {
@@ -40,6 +34,22 @@ gradlePlugin {
         register("androidApplication") {
             id = libs.plugins.application.get().pluginId
             implementationClass = "conventionPlugins.ApplicationConventionPlugin"
+        }
+        register("androidLibrary") {
+            id = libs.plugins.library.get().pluginId
+            implementationClass = "conventionPlugins.LibraryConventionPlugin"
+        }
+        register("jvmKotlin") {
+            id = libs.plugins.convention.jvm.get().pluginId
+            implementationClass = "conventionPlugins.JvmConventionPlugin"
+        }
+        register("androidApplicationCompose") {
+            id = libs.plugins.applicationCompose.get().pluginId
+            implementationClass = "conventionPlugins.ComposeApplicationConventionPlugin"
+        }
+        register("androidLibraryCompose") {
+            id = libs.plugins.libraryCompose.get().pluginId
+            implementationClass = "conventionPlugins.ComposeLibraryConventionPlugin"
         }
     }
 }

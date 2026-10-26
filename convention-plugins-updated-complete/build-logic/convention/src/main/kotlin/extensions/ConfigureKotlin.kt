@@ -13,6 +13,7 @@ internal inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() 
         is KotlinJvmProjectExtension -> compilerOptions
         else -> throw Exception("Unsupported Kotlin project type")
     }.apply {
-        jvmTarget.set(JvmTarget.JVM_11)
+        jvmToolchain(17)
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
