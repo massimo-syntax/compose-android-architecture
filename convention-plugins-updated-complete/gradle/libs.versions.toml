@@ -10,13 +10,24 @@ kotlin = "2.4.21"
 composeBom = "2026.09.00"
 appcompat = "1.8.0"
 material = "1.14.0"
+#hilt
+ksp = "2.3.11"
+hilt = "2.60.1"
+hiltViewModel = "1.4.0"
 
 [libraries]
-androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+# tests
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+
+# ktx libraries
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+
+# lifecycle
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+
+#compose
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
@@ -27,12 +38,27 @@ androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+
 # Dependencies of the included build-logic
 android-gradleApiPlugin = { group = "com.android.tools.build", name = "gradle-api", version.ref = "agp" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
+# used by hilt
+ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
+
+# not needed after agp 9.
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+# not used here
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+
+#hilt
+hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+hilt-viewmodel = {group  = "androidx.hilt" , name = "hilt-lifecycle-viewmodel-compose", version.ref = "hiltViewModel"}
+
+
+
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -41,9 +67,14 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
+ksp = { id ="com.google.devtools.ksp", version.ref = "ksp" }
+# hilt
+daggerHilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+
 #convention plugins
 application = { id = "convetion.plugin.application" }
 library = { id = "convetion.plugin.library" }
 convention-jvm = { id = "convetion.plugin.kotlin.jvm" }
 applicationCompose = { id = "convetion.plugin.application.compose" }
 libraryCompose = { id = "convetion.plugin.library.compose" }
+hilt = { id = "convetion.plugin.hilt" }

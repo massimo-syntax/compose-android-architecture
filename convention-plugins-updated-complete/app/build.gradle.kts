@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.application)
     alias(libs.plugins.applicationCompose)
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -10,8 +11,6 @@ android {
         applicationId = "com.example.conventionpluginsupdatedcomplete"
         versionCode = 1
         versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -31,6 +30,8 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
 
+    // modules
     implementation(projects.core.domain)
+    implementation(projects.core.data)
     implementation(projects.myfeature)
 }

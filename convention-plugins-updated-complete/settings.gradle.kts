@@ -28,4 +28,5 @@ dependencyResolutionManagement {
 rootProject.name = "ConventionPluginsUpdatedComplete"
 include(":app")
 include(":core:domain")
+include(":core:data")
 include(":myfeature")

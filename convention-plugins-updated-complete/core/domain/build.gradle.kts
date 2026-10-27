@@ -1,14 +1,8 @@
 plugins {
-    id("java-library")
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.convention.jvm)
+    alias(libs.plugins.library)
+    alias(libs.plugins.hilt)
 }
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-}
-kotlin {
-    compilerOptions {
-        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
-    }
+
+android {
+    namespace = "com.example.domain"
 }

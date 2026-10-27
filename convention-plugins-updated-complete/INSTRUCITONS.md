@@ -1,5 +1,4 @@
-# Convention Plugins Guide
-
+# Precise modern convention plugins installation, every peace, @november-2026
 > **Important:** Follow all instructions regarding the `build-logic` folder structure strictly in sequence, one step after another.
 
 ## 1. Initialize `build-logic` Project
@@ -222,11 +221,14 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 internal fun Project.configureAndroid(
    commonExtension: CommonExtension,
 ) {
-   commonExtension.apply {
-      compileSdk = 37
-      defaultConfig.minSdk = 24
+   commonExtension.apply { 
+       compileSdk = 37
+       defaultConfig.minSdk = 24
+       defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-      if (this is ApplicationExtension) {
+       buildFeatures.buildConfig = true
+       
+       if (this is ApplicationExtension) {
          defaultConfig.targetSdk = 37
       }
    }
@@ -345,6 +347,8 @@ By applying the convention plugin, redundant configurations in the `:app` module
       defaultConfig.minSdk = 24
       ...
       defaultConfig.targetSdk = 37
+      testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
       
   }
   ```
@@ -359,7 +363,6 @@ android {
         applicationId = "com.example.conventionpluginsupdatedcomplete"
         versionCode = 1
         versionName = "1.0"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -440,19 +443,24 @@ plugins {
 // remove entire block
 compileSdk {
     version = release(37)
-}
 
+}// remove all
 defaultConfig {
-    minSdk = 24 // remove
-
+    minSdk = 24 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 }
 
 // remove entire
 compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
+
+// android block remains
+android {
+    namespace = "com.example.myfeature"
+}
+
 
 ```
 
@@ -525,13 +533,13 @@ plugins {
 }
 // remove whole
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 // remove as well the whole
 kotlin {
     compilerOptions {
-        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 ```
@@ -718,3 +726,114 @@ Now everything about compose, all the libraries and build feature, are not neede
 
 ---
 
+## Hilt Convention Plugin (`HiltConventionPlugin.kt`)
+*(Used for modules requiring Dependency Injection with Dagger Hilt)*
+
+### Step 1: Add Dependencies & Plugins to Version Catalog (`gradle/libs.versions.toml`)
+Add the necessary versions, libraries, and plugins required for KSP and Dagger Hilt in `libs.versions.toml`:
+
+```toml
+[versions]
+# ...
+ksp = "2.3.11"
+hilt = "2.60.1"
+hiltViewModel = "1.4.0"
+
+[libraries]
+# ...
+# Used by build-logic convention plugin
+ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
+
+# Hilt dependencies
+hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+hilt-viewmodel = { group = "androidx.hilt", name = "hilt-lifecycle-viewmodel-compose", version.ref = "hiltViewModel" }
+
+[plugins]
+# ...
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+daggerHilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+
+# Convention plugin
+hilt = { id = "convetion.plugin.hilt" }
+```
+
+### Step 2: Add External Plugin Classpath to `:build-logic:convention` (`build-logic/convention/build.gradle.kts`)
+Add the KSP Gradle plugin artifact as a `compileOnly` dependency in `build-logic/convention/build.gradle.kts` so that convention plugins can access KSP classes and extension accessors:
+
+```kotlin
+dependencies {
+    // ...
+    // External plugin dependencies needed by convention plugins
+    compileOnly(libs.ksp.gradlePlugin)
+}
+```
+
+### Step 3: Apply Plugins in Root `build.gradle.kts`
+Apply KSP and Dagger Hilt in the root `build.gradle.kts` with `apply false`:
+
+```kotlin
+plugins {
+    // ...
+    alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.daggerHilt) apply false
+}
+```
+
+### Step 4: Create `HiltConventionPlugin.kt`
+Create `HiltConventionPlugin.kt` inside `build-logic/convention/src/main/kotlin/conventionPlugins/`:
+
+```kotlin
+package conventionPlugins
+
+import org.gradle.accessors.dm.LibrariesForLibs
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.the
+
+class HiltConventionPlugin : Plugin<Project> {
+    override fun apply(target: Project) {
+        with(target) {
+            val libs = the<LibrariesForLibs>()
+            apply(plugin = libs.plugins.ksp.get().pluginId)
+            apply(plugin = libs.plugins.daggerHilt.get().pluginId)
+
+            dependencies {
+                "implementation"(libs.androidx.activity.compose)
+                "ksp"(libs.hilt.compiler)
+                "implementation"(libs.hilt)
+                "implementation"(libs.hilt.viewmodel)
+            }
+        }
+    }
+}
+```
+
+### Step 5: Register Plugin in `:convention` (`build-logic/convention/build.gradle.kts`)
+Register the plugin inside the `gradlePlugin` block:
+
+```kotlin
+gradlePlugin {
+    plugins {
+        // ...
+        register("hilt") {
+            id = libs.plugins.hilt.get().pluginId
+            implementationClass = "conventionPlugins.HiltConventionPlugin"
+        }
+    }
+}
+```
+
+### Step 6: Apply in Feature / App / Library Modules (`build.gradle.kts`)
+In any module requiring Dagger Hilt, apply the custom Hilt convention plugin in its `build.gradle.kts`:
+
+```kotlin
+plugins {
+    alias(libs.plugins.library) // or application 
+    alias(libs.plugins.hilt)
+}
+```
+
+All Dagger Hilt dependencies and KSP annotation processor configurations are now automatically managed by the convention plugin.
