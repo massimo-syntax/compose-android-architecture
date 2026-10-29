@@ -1,4 +1,4 @@
-package com.example.data.dto.emaildetails
+package com.example.data.model.dto.emaildetails
 
 
 import kotlinx.serialization.SerialName
@@ -13,7 +13,7 @@ data class EmailDetailsDto(
     @SerialName("image")
     val image: String?,
     @SerialName("payload")
-    val payload: Payload?,
+    val payload: PayloadDto?,
     @SerialName("title")
     val title: String?
 )

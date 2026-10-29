@@ -26,6 +26,9 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)
 
+    // modules
+    implementation(project(":core"))
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)

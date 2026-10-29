@@ -1,4 +1,4 @@
-package com.example.data.dto.emaillist
+package com.example.data.model.dto.emaillist
 
 
 import kotlinx.serialization.SerialName

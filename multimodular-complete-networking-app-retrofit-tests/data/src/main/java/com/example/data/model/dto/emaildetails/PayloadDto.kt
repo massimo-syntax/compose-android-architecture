@@ -1,11 +1,10 @@
-package com.example.data.dto.emaildetails
-
+package com.example.data.model.dto.emaildetails
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Payload(
+data class PayloadDto(
     @SerialName("email")
     val email: String?,
     @SerialName("from")

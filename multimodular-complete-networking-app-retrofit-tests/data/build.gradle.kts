@@ -40,6 +40,10 @@ dependencies {
     // hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
+
+    // modules
+    implementation(project(":core"))
+    implementation(project(":domain"))
 }
 
 
