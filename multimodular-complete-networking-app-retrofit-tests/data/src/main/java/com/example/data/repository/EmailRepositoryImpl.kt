@@ -9,6 +9,7 @@ import com.example.data.remote.safecall.safeApiCall
 import com.example.domain.model.emaildetails.EmailDetails
 import com.example.domain.model.emaillist.EmailListItem
 import com.example.domain.repository.EmailRepository
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 class EmailRepositoryImpl @Inject constructor(
