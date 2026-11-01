@@ -5,9 +5,9 @@ import com.example.data.model.dto.emaillist.EmailListItemDto
 import retrofit2.http.GET
 
 interface ApiService {
-    @GET("api/v1/emaillist")
+    @GET("/api/v1/emailList")
     suspend fun getEmailList(): List<EmailListItemDto>
 
-    @GET("api/v1/emaildetails")
+    @GET("/api/v1/emaildetails")
     suspend fun getEmailDetail(): List<EmailDetailsDto>
 }

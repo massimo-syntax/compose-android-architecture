@@ -1,7 +1,6 @@
 package com.example.data.remote.safecall
 
 import com.example.core.networkresponse.error.Failure
-import com.example.core.networkresponse.mapper.ResultMapper
 import com.example.core.networkresponse.response.ResultEither
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -17,9 +16,9 @@ suspend fun <T, R> safeApiCall(
             val response = apiCall()
             ResultEither.Success(mapper(response))
         }
-    }.getOrElse {
+    }.getOrElse { throwable ->
         // run catching returns an exception
         // parse throwable in type safe error
-        it.toEitherResult()
+        throwable.toResultError()
     }
 }

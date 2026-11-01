@@ -6,7 +6,7 @@ import retrofit2.HttpException
 import java.io.IOException
 
 // translate to type safe error
-fun Throwable.toEitherResult(): ResultEither<Failure, Nothing> {
+fun Throwable.toResultError(): ResultEither<Failure, Nothing> {
     return when (this) {
         is IOException -> ResultEither.Error(Failure.NetworkError(this))
         is HttpException -> {

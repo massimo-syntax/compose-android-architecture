@@ -12,7 +12,7 @@ sealed class Failure  {
 fun Failure.getErrorMessage(): String {
     return when (this) {
         is Failure.NetworkError -> "Network error occurred: ${exception.message}"
-        is Failure.ServerError -> message
+        is Failure.ServerError -> "Error: $code, $message"
         is Failure.UnknownError -> "An unknown error occurred: ${throwable.message}"
     }
 }
