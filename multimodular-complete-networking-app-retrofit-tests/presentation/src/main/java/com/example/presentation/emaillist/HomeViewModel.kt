@@ -9,8 +9,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -21,6 +24,12 @@ class HomeViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<EmailListState>(EmailListState.Loading)
     val uiState = _uiState.asStateFlow()
+        .onStart { event(EmailListEvent.LoadEmailList) }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            EmailListState.Loading
+        )
 
     private val _effect: MutableSharedFlow<EmailListEffect> = MutableSharedFlow(replay = 0)
     val effect = _effect.asSharedFlow()
@@ -34,7 +43,8 @@ class HomeViewModel @Inject constructor(
             }
             is EmailListEvent.LoadEmailList -> {
                 viewModelScope.launch {
-                    repo.getEmailList().fold(
+                    val result = repo.getEmailList()
+                    result.fold(
                         onError = { error ->
                             _uiState.update { EmailListState.Error(error) }
                         },

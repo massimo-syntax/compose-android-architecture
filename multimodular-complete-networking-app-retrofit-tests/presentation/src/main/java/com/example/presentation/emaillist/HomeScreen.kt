@@ -31,13 +31,13 @@ fun HomeScreen(
 
     // loading items not by viewModel init{}
     LaunchedEffect(uiState) {
-        // prevent reloading when viewModel exists
+        // prevent reloading when viewModel already exists, like back navigation
         if(uiState !is EmailListState.Success){
             viewModel.event(EmailListEvent.LoadEmailList)
         }
     }
 
-    // observe navigation
+    // observe effect
     LaunchedEffect(Unit){
         viewModel.effect.collectLatest {
             when(it){

@@ -1,6 +1,6 @@
 # Modern Retrofit Usage Instructions
 
-The Implementation uses  **Hilt** and **Kotlinx Serialization**.
+The implementation uses **Hilt** and **Kotlinx Serialization**.
 
 ---
 
@@ -117,11 +117,20 @@ object NetworkModule {
 
 ---
 
-## Create some function to grant a clean result from the api request
+## 4. Approaches to Return a Type-Safe API Result
 
-Create files in a package to contain result related classes, in :core or :data module
+To handle network requests cleanly and return typed results instead of raw exceptions, choose one of the two approaches below based on project needs:
 
-### Types to explain network errors on exception (`Failure.kt`):
+- **Approach A: Functional / Mapper-Based (`ResultEither` + `ResultMapper`)** — Suitable for larger apps requiring structured error types and decoupled DTO-to-Domain mapping.
+- **Approach B: Lightweight / Direct (`ApiResult` + `NetworkError`)** — A simpler, lightweight alternative that encapsulates errors directly without needing dedicated mapper interfaces.
+
+---
+
+### Approach A: Functional / Mapper-Based (`ResultEither`)
+
+Create helper files in `:core` or `:data` module.
+
+#### 1. Network Failure Representation (`Failure.kt`):
 ```kotlin
 package com.example.core.networkresponse.error
 
@@ -143,7 +152,7 @@ fun Failure.getErrorMessage(): String {
 }
 ```
 
-### Result mapper to translate DTO to Domain model (`ResultMapper.kt`):
+#### 2. Result Mapper Interface (`ResultMapper.kt`):
 ```kotlin
 package com.example.core.networkresponse.mapper
 
@@ -152,11 +161,10 @@ fun interface ResultMapper<T, R> {
 }
 ```
 
-### Classes to define Result or Error (`ResultEither.kt`):
+#### 3. Either Result Type (`ResultEither.kt`):
 ```kotlin
 package com.example.core.networkresponse.response
 
-// EITHER
 sealed class ResultEither<out E, out S> {
     data class Error<out T>(val value: T) : ResultEither<T, Nothing>()
     data class Success<out T>(val value: T) : ResultEither<Nothing, T>()
@@ -171,13 +179,7 @@ inline fun <S, E, T> ResultEither<E, S>.fold(
 }
 ```
 
----
-
-## 5. Safe API Call Implementation (`:data` module)
-
-In the `:data` module under `data.remote.safecall`, create helper functions to execute safe network calls with type-safe results.
-
-### Translate Java / Retrofit exceptions to type-safe errors (`ErrorHandler.kt`):
+#### 4. Safe API Execution & Error Handler (`ErrorHandler.kt` & `SafeApiCall.kt`):
 ```kotlin
 package com.example.data.remote.safecall
 
@@ -186,7 +188,6 @@ import com.example.core.networkresponse.response.ResultEither
 import retrofit2.HttpException
 import java.io.IOException
 
-// translate java exception to type safe error
 fun Throwable.toEitherResult(): ResultEither<Failure, Nothing> {
     return when (this) {
         is IOException -> ResultEither.Error(Failure.NetworkError(this))
@@ -200,7 +201,6 @@ fun Throwable.toEitherResult(): ResultEither<Failure, Nothing> {
 }
 ```
 
-### Function to perform safe network calls returning typed results (`SafeApiCall.kt`):
 ```kotlin
 package com.example.data.remote.safecall
 
@@ -211,7 +211,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-// function to receive a segregated type safe result from network request
 suspend fun <T, R> safeApiCall(
     ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     apiCall: suspend () -> T,
@@ -222,17 +221,125 @@ suspend fun <T, R> safeApiCall(
             val response = apiCall()
             ResultEither.Success(mapper.map(response))
         }
-    }.getOrElse {
-        // run catching returns an exception
-        // parse throwable in type safe error
-        it.toEitherResult()
+    }.getOrElse { throwable ->
+        throwable.toEitherResult()
     }
 }
 ```
 
 ---
 
-## 6. Domain Models (`:domain` module)
+### Approach B: Lightweight / Direct (`ApiResult`)
+
+A simpler, lightweight approach that handles success and network errors directly. The code can be kept together or placed into separate files as needed.
+
+#### 1. Network Error & Result Definitions (`ApiResult.kt`):
+
+```kotlin
+import java.io.IOException
+import java.net.SocketTimeoutException
+import kotlinx.coroutines.CancellationException
+import retrofit2.HttpException
+
+sealed interface NetworkError {
+    val isRetryable: Boolean get() = false
+
+    data object NoInternet : NetworkError { override val isRetryable = true }
+    data object Timeout : NetworkError { override val isRetryable = true }
+    data object Server : NetworkError { override val isRetryable = true }
+
+    data object Unauthorized : NetworkError
+    data object Forbidden : NetworkError
+    data object NotFound : NetworkError
+    data object Serialization : NetworkError
+
+    data class Http(val code: Int, val message: String?) : NetworkError {
+        override val isRetryable: Boolean get() = code == 408 || code == 429
+    }
+
+    data class Unknown(val cause: Throwable) : NetworkError
+}
+
+sealed interface ApiResult<out T> {
+    data class Success<out T>(val data: T) : ApiResult<T>
+    data class Failure(val error: NetworkError) : ApiResult<Nothing>
+}
+```
+
+#### 2. Safe API Call Execution & Error Mapping (`SafeApiCall.kt`):
+
+```kotlin
+suspend fun <T> safeApiCall(block: suspend () -> T): ApiResult<T> =
+    try {
+        ApiResult.Success(block())
+    } catch (e: CancellationException) {
+        throw e // Never swallow Coroutine CancellationException
+    } catch (e: Throwable) {
+        ApiResult.Failure(e.toNetworkError())
+    }
+
+fun Throwable.toNetworkError(): NetworkError = when (this) {
+    is HttpException -> when (code()) {
+        401 -> NetworkError.Unauthorized
+        403 -> NetworkError.Forbidden
+        404 -> NetworkError.NotFound
+        in 500..599 -> NetworkError.Server
+        else -> NetworkError.Http(code(), message())
+    }
+    is SocketTimeoutException -> NetworkError.Timeout // Must come before IOException
+    is IOException -> NetworkError.NoInternet
+    is kotlinx.serialization.SerializationException, // kotlinx.serialization
+    is com.squareup.moshi.JsonDataException,          // Moshi
+    is com.google.gson.JsonParseException -> NetworkError.Serialization // Gson
+    else -> NetworkError.Unknown(this)
+}
+```
+
+#### 3. DTO to Domain Mapping via Extension Functions
+
+To map DTOs into Domain models, extension functions can be declared directly inside the DTO file (typically located in the `:data` module).
+
+```kotlin
+@Serializable
+data class MyDataDto(
+    val a: String,
+    val b: String,
+    val z: List<MoreDataDto>
+)
+
+@Serializable
+data class MoreDataDto(
+    val x: Int,
+    val y: Double
+)
+
+fun MoreDataDto.toDomain() = MyMoreData(
+    x = x,
+    y = y
+)
+
+fun List<MoreDataDto>.toDomain() = map { it.toDomain() }
+
+fun MyDataDto.toDomain() = MyData(
+    a = a,
+    b = b,
+    z = z.toDomain()
+)
+```
+
+This transforms raw DTO models into Domain models (usually stored in the `:domain` module) which are then accessed by ViewModels and Composables.
+
+In the repository implementation, execute the safe API call and map directly:
+
+```kotlin
+override suspend fun getMyData(): ApiResult<MyData> = safeApiCall {
+    apiService.getData().toDomain()
+}
+```
+
+---
+
+## 5. Domain Models (`:domain` module)
 
 In the `:domain` layer (or package responsible for domain code), create the models used for the rest of the application that are not directly tied to the raw network response.
 
@@ -261,10 +368,9 @@ data class Data(
 )
 ```
 
-
 ---
 
-## 7. Data Mappers (`:data` module)
+## 6. Data Mappers (`:data` module)
 
 Create the mappers in the `:data` module under the `mapper` package.
 
@@ -373,10 +479,9 @@ fun DataDetailsDto.toDomain() = DataDetails(
 fun List<DataDetailsDto>.toDomain(): List<DataDetails> = map { it.toDomain() }
 ```
 
-
 ---
 
-## 8. Repository Layer & Dependency Injection
+## 7. Repository Layer & Dependency Injection
 
 ### Repository Interface (`:domain` module)
 
@@ -397,7 +502,7 @@ interface DataRepository {
 ```
 
 > [!WARNING]
-> If the repository interface returns `Failure Error Success_Type` or `Result_*` classes stored in another module, that module must be added as a dependency in `:domain/build.gradle.kts`. Ideally, the domain module should remain as independent of external dependencies as possible.
+> If the repository interface returns `Failure`, `Error`, `Success_Type`, or `Result_*` classes stored in another module, that module must be added as a dependency in `:domain/build.gradle.kts`. Ideally, the domain module should remain as independent of external dependencies as possible.
 
 ### Repository Implementation (`:data` module)
 
