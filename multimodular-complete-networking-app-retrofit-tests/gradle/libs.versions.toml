@@ -32,6 +32,7 @@ constraintlayoutCompose="1.1.2"
 materialIconsExtended="1.7.8"
 appcompat = "1.8.0"
 material = "1.14.0"
+navigation3 = "1.2.0"
 
 [libraries]
 # kotlin
@@ -83,6 +84,11 @@ glide = { module = "com.github.bumptech.glide:compose", version.ref = "glideComp
 #View
 extendedspans = { module = "me.saket.extendedspans:extendedspans", version.ref = "extendedspans" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
+
+# Navigation 3
+androidx-navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runtime", version.ref = "navigation3" }
+androidx-navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
+androidx-lifecycle-viewmodel-navigation3 = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-navigation3", version.ref = "lifecycleRuntimeKtx" }
 
 
 

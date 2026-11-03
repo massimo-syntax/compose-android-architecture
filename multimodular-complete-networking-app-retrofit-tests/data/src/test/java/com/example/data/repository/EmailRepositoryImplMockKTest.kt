@@ -2,6 +2,8 @@ package com.example.data.repository
 
 import com.example.core.networkresponse.error.Failure
 import com.example.core.networkresponse.response.ResultEither
+import com.example.core.networkresult.NetworkError
+import com.example.core.networkresult.NetworkResult
 import com.example.data.mapper.EmailDetailsMapper
 import com.example.data.mapper.EmailListMapper
 import com.example.data.model.dto.emaildetails.EmailDetailsDto
@@ -89,7 +91,7 @@ class EmailRepositoryImplMockKTest {
         coVerify(exactly = 1) { apiService.getEmailList() }
         assertTrue("Expected ResultEither.Error", result is ResultEither.Error)
 
-        val error = (result as ResultEither.Error).value
+        val error = (result as ResultEither.Error).error
         assertTrue("Expected Failure.NetworkError", error is Failure.NetworkError)
         assertEquals(networkException, (error as Failure.NetworkError).exception)
     }
@@ -111,7 +113,7 @@ class EmailRepositoryImplMockKTest {
         coVerify(exactly = 1) { apiService.getEmailList() }
         assertTrue("Expected ResultEither.Error", result is ResultEither.Error)
 
-        val error = (result as ResultEither.Error).value
+        val error = (result as ResultEither.Error).error
         assertTrue("Expected Failure.ServerError", error is Failure.ServerError)
         assertEquals(500, (error as Failure.ServerError).code)
     }
@@ -139,9 +141,9 @@ class EmailRepositoryImplMockKTest {
 
         // Then
         coVerify(exactly = 1) { apiService.getEmailDetail() }
-        assertTrue("Expected ResultEither.Success", result is ResultEither.Success)
+        assertTrue("Expected NetworkResult.Success", result is NetworkResult.Success)
 
-        val details = (result as ResultEither.Success).value
+        val details = (result as NetworkResult.Success).data
         assertEquals(1, details.size)
         assertEquals("101", details[0].id)
         assertEquals("Detail Title", details[0].title)
@@ -160,10 +162,10 @@ class EmailRepositoryImplMockKTest {
 
         // Then
         coVerify(exactly = 1) { apiService.getEmailDetail() }
-        assertTrue("Expected ResultEither.Error", result is ResultEither.Error)
+        assertTrue("Expected NetworkResult.Failure", result is NetworkResult.Failure)
 
-        val error = (result as ResultEither.Error).value
-        assertTrue("Expected Failure.UnknownError", error is Failure.UnknownError)
-        assertEquals(unexpectedException, (error as Failure.UnknownError).throwable)
+        val error = (result as NetworkResult.Failure).error
+        assertTrue("Expected NetworkError.Unknown", error is NetworkError.Unknown)
+        assertEquals(unexpectedException, (error as NetworkError.Unknown).cause)
     }
 }

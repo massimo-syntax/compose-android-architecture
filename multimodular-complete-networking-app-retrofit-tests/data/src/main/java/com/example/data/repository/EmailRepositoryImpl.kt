@@ -2,14 +2,16 @@ package com.example.data.repository
 
 import com.example.core.networkresponse.error.Failure
 import com.example.core.networkresponse.response.ResultEither
+import com.example.core.networkresult.NetworkResult
 import com.example.data.mapper.EmailDetailsMapper
 import com.example.data.mapper.EmailListMapper
+import com.example.data.mapper.toDomain
 import com.example.data.remote.api.ApiService
 import com.example.data.remote.safecall.safeApiCall
+import com.example.data.remote.safecall.safeApiCall_
 import com.example.domain.model.emaildetails.EmailDetails
 import com.example.domain.model.emaillist.EmailListItem
 import com.example.domain.repository.EmailRepository
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 class EmailRepositoryImpl @Inject constructor(
@@ -25,11 +27,6 @@ class EmailRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun getEmailDetail(): ResultEither<Failure, List<EmailDetails>> =
-        safeApiCall(
-            apiCall = { apiService.getEmailDetail() },
-            mapper = { emailDetailsMapper.map(it) }
-            //mapper = { dtos -> dtos.toDomain() }
-        )
-
+    override suspend fun getEmailDetail(): NetworkResult<List<EmailDetails>> =
+        safeApiCall_ { apiService.getEmailDetail().toDomain() }
 }

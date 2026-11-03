@@ -1,0 +1,2 @@
+-keep,allowobfuscation,allowshrinking class com.example.feature.details.impl.EmailDetailsViewModel
+-keep,allowobfuscation,allowshrinking class com.example.feature.details.impl.EmailDetailsViewModel

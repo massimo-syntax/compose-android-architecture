@@ -2,6 +2,8 @@ package com.example.data.repository
 
 import com.example.core.networkresponse.error.Failure
 import com.example.core.networkresponse.response.ResultEither
+import com.example.core.networkresult.NetworkError
+import com.example.core.networkresult.NetworkResult
 import com.example.data.mapper.EmailDetailsMapper
 import com.example.data.mapper.EmailListMapper
 import com.example.data.remote.api.ApiService
@@ -109,7 +111,7 @@ class EmailRepositoryImplMockWebServerTest {
 
         // Verify correct API endpoint was requested
         val recordedRequest = mockWebServer.takeRequest()
-        assertEquals("/api/v1/emaillist", recordedRequest.path)
+        assertEquals("/api/v1/emailList", recordedRequest.path)
         assertEquals("GET", recordedRequest.method)
     }
 
@@ -176,7 +178,7 @@ class EmailRepositoryImplMockWebServerTest {
 
         // Then
         assertTrue("Expected ResultEither.Error", result is ResultEither.Error)
-        val error = (result as ResultEither.Error).value
+        val error = (result as ResultEither.Error).error
         assertTrue("Expected Failure.ServerError", error is Failure.ServerError)
         assertEquals(500, (error as Failure.ServerError).code)
     }
@@ -195,7 +197,7 @@ class EmailRepositoryImplMockWebServerTest {
 
         // Then
         assertTrue("Expected ResultEither.Error", result is ResultEither.Error)
-        val error = (result as ResultEither.Error).value
+        val error = (result as ResultEither.Error).error
         assertTrue("Expected Failure.ServerError", error is Failure.ServerError)
         assertEquals(404, (error as Failure.ServerError).code)
     }
@@ -212,7 +214,7 @@ class EmailRepositoryImplMockWebServerTest {
 
         // Then
         assertTrue("Expected ResultEither.Error", result is ResultEither.Error)
-        val error = (result as ResultEither.Error).value
+        val error = (result as ResultEither.Error).error
         assertTrue("Expected Failure.NetworkError", error is Failure.NetworkError)
     }
 
@@ -246,8 +248,8 @@ class EmailRepositoryImplMockWebServerTest {
         val result = repository.getEmailDetail()
 
         // Then
-        assertTrue("Expected ResultEither.Success", result is ResultEither.Success)
-        val details = (result as ResultEither.Success).value
+        assertTrue("Expected NetworkResult.Success", result is NetworkResult.Success)
+        val details = (result as NetworkResult.Success).data
 
         assertEquals(1, details.size)
         assertEquals("101", details[0].id)
@@ -273,8 +275,8 @@ class EmailRepositoryImplMockWebServerTest {
         val result = repository.getEmailDetail()
 
         // Then
-        assertTrue("Expected ResultEither.Error", result is ResultEither.Error)
-        val error = (result as ResultEither.Error).value
-        assertTrue("Expected Failure.ServerError", error is Failure.ServerError)
+        assertTrue("Expected NetworkResult.Failure", result is NetworkResult.Failure)
+        val error = (result as NetworkResult.Failure).error
+        assertTrue("Expected NetworkError.Server", error is NetworkError.Server)
     }
 }

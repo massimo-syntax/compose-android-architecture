@@ -8,6 +8,6 @@ interface ApiService {
     @GET("/api/v1/emailList")
     suspend fun getEmailList(): List<EmailListItemDto>
 
-    @GET("/api/v1/emaildetails")
+    @GET("/api/v1/emailDetail")
     suspend fun getEmailDetail(): List<EmailDetailsDto>
 }

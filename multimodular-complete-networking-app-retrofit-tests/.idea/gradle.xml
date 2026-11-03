@@ -13,7 +13,14 @@
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/data" />
             <option value="$PROJECT_DIR$/domain" />
-            <option value="$PROJECT_DIR$/presentation" />
+            <option value="$PROJECT_DIR$/feature" />
+            <option value="$PROJECT_DIR$/feature/details" />
+            <option value="$PROJECT_DIR$/feature/details/api" />
+            <option value="$PROJECT_DIR$/feature/details/impl" />
+            <option value="$PROJECT_DIR$/feature/list" />
+            <option value="$PROJECT_DIR$/feature/list/api" />
+            <option value="$PROJECT_DIR$/feature/list/impl" />
+            <option value="$PROJECT_DIR$/navigation" />
             <option value="$PROJECT_DIR$/ui" />
           </set>
         </option>

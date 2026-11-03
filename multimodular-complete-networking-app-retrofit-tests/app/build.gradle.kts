@@ -65,5 +65,8 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     // modules
-    implementation(project(":presentation"))
+    implementation(project(":data"))
+    implementation(project(":navigation"))
+    implementation(project(":feature:list:impl"))
+    implementation(project(":feature:details:impl"))
 }

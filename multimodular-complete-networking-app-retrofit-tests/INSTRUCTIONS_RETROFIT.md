@@ -117,12 +117,46 @@ object NetworkModule {
 
 ---
 
+## Create Models, DTO and "domain" (`:domain` module)
+
+In the `:domain` layer (or package responsible for domain code), create the models used for the rest of the application that are not directly tied to the raw network response.
+
+In the `model` package, create data classes with fields needed by the application (or with matching fields/subclasses as the DTO models).
+
+### Example:
+
+**`:data` module or package (DTO model used to parse JSON into Kotlin data classes):**
+```kotlin
+@Serializable
+data class DataDto(
+    val id: String,
+    val title: String,
+    val description: String,
+    val magicNumber: Int
+)
+```
+
+**`:domain` module or package (Domain model used across the rest of the app):**
+```kotlin
+data class Data(
+    val id: String,
+    val title: String,
+    val description: String,
+    // No magic number in this case, for example
+)
+```
+
+
+
+
+
+
 ## 4. Approaches to Return a Type-Safe API Result
 
 To handle network requests cleanly and return typed results instead of raw exceptions, choose one of the two approaches below based on project needs:
 
-- **Approach A: Functional / Mapper-Based (`ResultEither` + `ResultMapper`)** — Suitable for larger apps requiring structured error types and decoupled DTO-to-Domain mapping.
-- **Approach B: Lightweight / Direct (`ApiResult` + `NetworkError`)** — A simpler, lightweight alternative that encapsulates errors directly without needing dedicated mapper interfaces.
+- **Approach A: Functional / Mapper-Based (`ResultEither` + `ResultMapper`)** — Suitable for larger apps requiring structured error types and decoupled DTO-to-Domain mapping classes.
+- **Approach B: Lightweight / Direct (`NetworkResult` + `NetworkError`)** — A simpler, lightweight alternative that encapsulates errors directly without needing dedicated mapper interfaces.
 
 ---
 
@@ -201,6 +235,39 @@ fun Throwable.toEitherResult(): ResultEither<Failure, Nothing> {
 }
 ```
 
+
+### Class Mappers implementing `ResultMapper`
+Create the mappers in the `:data` module under the `mapper` package.
+
+```kotlin
+package com.example.data.mapper
+
+import com.example.core.networkresponse.mapper.ResultMapper
+import com.example.data.model.dto.DataItemDto
+import com.example.domain.model.DataItem
+import javax.inject.Inject
+
+class DataListMapper @Inject constructor() :
+    ResultMapper<List<DataItemDto>, List<DataItem>>
+{
+    override fun map(input: List<DataItemDto>): List<DataItem> =
+        input.filter {
+            it.id != null
+        }.map {
+            it.toDomain()
+        }
+
+    private fun DataItemDto.toDomain() =
+        DataItem(
+            id = id ?: "",
+            title = title.orEmpty(),
+            description = desc.orEmpty()
+        )
+}
+```
+
+#### Safe API call
+
 ```kotlin
 package com.example.data.remote.safecall
 
@@ -229,11 +296,14 @@ suspend fun <T, R> safeApiCall(
 
 ---
 
-### Approach B: Lightweight / Direct (`ApiResult`)
+### Approach B: Lightweight / Direct (`NetworkResult`)
 
-A simpler, lightweight approach that handles success and network errors directly. The code can be kept together or placed into separate files as needed.
+A simpler, lightweight approach that handles success and network errors directly with a single generic parameter `NetworkResult<T>`.
 
-#### 1. Network Error & Result Definitions (`ApiResult.kt`):
+> [!TIP]
+> Place `NetworkResult` and `NetworkError` in the `:core` module (`com.example.core.networkresult`) so `:domain`, `:data`, and UI modules can access them directly without circular dependencies.
+
+#### 1. Network Error & Result Definitions (`:core` module -> `NetworkResult.kt`):
 
 ```kotlin
 import java.io.IOException
@@ -260,22 +330,32 @@ sealed interface NetworkError {
     data class Unknown(val cause: Throwable) : NetworkError
 }
 
-sealed interface ApiResult<out T> {
-    data class Success<out T>(val data: T) : ApiResult<T>
-    data class Failure(val error: NetworkError) : ApiResult<Nothing>
+sealed interface NetworkResult<out T> {
+    data class Success<out T>(val data: T) : NetworkResult<T>
+    data class Failure(val error: NetworkError) : NetworkResult<Nothing>
 }
 ```
 
-#### 2. Safe API Call Execution & Error Mapping (`SafeApiCall.kt`):
+#### 2. Safe API Execution & Throwable Mapping (`:data` module -> `SafeApiCall_.kt`):
 
 ```kotlin
-suspend fun <T> safeApiCall(block: suspend () -> T): ApiResult<T> =
+package com.example.data.remote.safecall
+
+import com.example.core.networkresult.NetworkError
+import com.example.core.networkresult.NetworkResult
+import java.io.IOException
+import java.net.SocketTimeoutException
+import kotlinx.coroutines.CancellationException
+import kotlinx.serialization.SerializationException
+import retrofit2.HttpException
+
+suspend fun <T> safeApiCall_(block: suspend () -> T): NetworkResult<T> =
     try {
-        ApiResult.Success(block())
+        NetworkResult.Success(block())
     } catch (e: CancellationException) {
         throw e // Never swallow Coroutine CancellationException
     } catch (e: Throwable) {
-        ApiResult.Failure(e.toNetworkError())
+        NetworkResult.Failure(e.toNetworkError())
     }
 
 fun Throwable.toNetworkError(): NetworkError = when (this) {
@@ -288,16 +368,15 @@ fun Throwable.toNetworkError(): NetworkError = when (this) {
     }
     is SocketTimeoutException -> NetworkError.Timeout // Must come before IOException
     is IOException -> NetworkError.NoInternet
-    is kotlinx.serialization.SerializationException, // kotlinx.serialization
-    is com.squareup.moshi.JsonDataException,          // Moshi
-    is com.google.gson.JsonParseException -> NetworkError.Serialization // Gson
+    is SerializationException, // Kotlinx Serialization
+    // is JsonDataException,    // Moshi (uncomment if using Moshi)
+    // is JsonParseException    // Gson (uncomment if using Gson)
+    -> NetworkError.Serialization
     else -> NetworkError.Unknown(this)
 }
 ```
 
-#### 3. DTO to Domain Mapping via Extension Functions
-
-To map DTOs into Domain models, extension functions can be declared directly inside the DTO file (typically located in the `:data` module).
+#### 3. DTO to Domain Mapping via Extension Functions (`:data` module -> `Mappers.kt`):
 
 ```kotlin
 @Serializable
@@ -327,157 +406,14 @@ fun MyDataDto.toDomain() = MyData(
 )
 ```
 
-This transforms raw DTO models into Domain models (usually stored in the `:domain` module) which are then accessed by ViewModels and Composables.
-
 In the repository implementation, execute the safe API call and map directly:
 
 ```kotlin
-override suspend fun getMyData(): ApiResult<MyData> = safeApiCall {
+override suspend fun getMyData(): NetworkResult<MyData> = safeApiCall_ {
     apiService.getData().toDomain()
 }
 ```
 
----
-
-## 5. Domain Models (`:domain` module)
-
-In the `:domain` layer (or package responsible for domain code), create the models used for the rest of the application that are not directly tied to the raw network response.
-
-In the `model` package, create data classes with fields needed by the application (or with matching fields/subclasses as the DTO models).
-
-### Example:
-
-**`:data` module or package (DTO model used to parse JSON into Kotlin data classes):**
-```kotlin
-@Serializable
-data class DataDto(
-    val id: String,
-    val title: String,
-    val description: String,
-    val magicNumber: Int
-)
-```
-
-**`:domain` module or package (Domain model used across the rest of the app):**
-```kotlin
-data class Data(
-    val id: String,
-    val title: String,
-    val description: String,
-    // No magic number in this case, for example
-)
-```
-
----
-
-## 6. Data Mappers (`:data` module)
-
-Create the mappers in the `:data` module under the `mapper` package.
-
-### Data List Mapper (`DataListMapper.kt`)
-```kotlin
-package com.example.data.mapper
-
-import com.example.core.networkresponse.mapper.ResultMapper
-import com.example.core.networkresponse.orDefault
-import com.example.data.model.dto.DataItemDto
-import com.example.domain.model.DataItem
-import javax.inject.Inject
-
-class DataListMapper @Inject constructor() :
-    ResultMapper<List<DataItemDto>, List<DataItem>>
-{
-    override fun map(input: List<DataItemDto>): List<DataItem> =
-        input.filter {
-            it.id != null
-        }.map {
-            it.toDomain()
-        }.sortedBy {
-            it.timestamp
-        }.reversed()
-
-    private fun DataItemDto.toDomain() =
-        DataItem(
-            id = id!!,
-            title = title.orEmpty(),
-            from = from ?: "Default Value",
-            image = image.orEmpty(),
-            timestamp = timestamp ?: 0L,
-            favorite = favorite.orDefault(false)
-        )
-}
-```
-
-### Data Details Mapper (`DataDetailsMapper.kt`)
-```kotlin
-package com.example.data.mapper
-
-import com.example.core.networkresponse.mapper.ResultMapper
-import com.example.data.model.dto.DataDetailsDto
-import com.example.data.model.dto.PayloadDto
-import com.example.domain.model.DataDetails
-import com.example.domain.model.Payload
-import javax.inject.Inject
-
-class DataDetailsMapper @Inject constructor() :
-    ResultMapper<List<DataDetailsDto>, List<DataDetails>>
-{
-    override fun map(input: List<DataDetailsDto>): List<DataDetails> =
-        input.filter {
-            it.id != null
-        }.map {
-            it.toDomain()
-        }
-
-    private fun DataDetailsDto.toDomain() =
-        DataDetails(
-            id = id ?: "404",
-            body = body.orEmpty(),
-            image = image.orEmpty(),
-            payload = payload?.toDomain(),
-            title = title.orEmpty()
-        )
-
-    private fun PayloadDto.toDomain() =
-        Payload(
-            email = email.orEmpty(),
-            from = from.orEmpty(),
-            timestamp = timestamp ?: 0L
-        )
-}
-```
-
-### Alternative Mapping Approaches
-
-Alternatively, as a mapper you can also use Kotlin's built-in mapping functions:
-
-```kotlin
-// Map directly on the result list
-someListResult.map { it.toDomain() }
-```
-
-Or pass a transformation lambda to the function executing the network call or returning the value:
-
-```kotlin
-// Pass transformation lambda to the safe network request
-someSafeNetworkRequest { dto -> dto.toDomain() }
-```
-
-### Mapper Location Strategy
-
-Mappers can be declared in separate mapper files (like `DataDetailsMapper.kt`) or placed directly in the same file as the model as extension functions:
-
-```kotlin
-fun DataDetailsDto.toDomain() = DataDetails(
-    id = id ?: "404",
-    title = title.orEmpty(),
-    body = body.orEmpty(),
-    image = image.orEmpty(),
-    payload = payload?.toDomain()
-)
-
-fun List<DataDetailsDto>.toDomain(): List<DataDetails> = map { it.toDomain() }
-```
 
 ---
 
@@ -485,62 +421,57 @@ fun List<DataDetailsDto>.toDomain(): List<DataDetails> = map { it.toDomain() }
 
 ### Repository Interface (`:domain` module)
 
-Create the `DataRepository` interface in the `:domain` module under `domain.repository`:
-
 ```kotlin
 package com.example.domain.repository
 
 import com.example.core.networkresponse.error.Failure
 import com.example.core.networkresponse.response.ResultEither
+import com.example.core.networkresult.NetworkResult
 import com.example.domain.model.DataDetails
 import com.example.domain.model.DataItem
 
 interface DataRepository {
-    suspend fun getDataList(): ResultEither<Failure, List<DataItem>>
-    suspend fun getDataDetails(): ResultEither<Failure, List<DataDetails>>
+    // Approach A
+    suspend fun getDataListWithResultEither(): ResultEither<Failure, List<DataItem>>
+
+    // Approach B (Lightweight)
+    suspend fun getDataList(): NetworkResult<List<DataItem>>
 }
 ```
 
-> [!WARNING]
-> If the repository interface returns `Failure`, `Error`, `Success_Type`, or `Result_*` classes stored in another module, that module must be added as a dependency in `:domain/build.gradle.kts`. Ideally, the domain module should remain as independent of external dependencies as possible.
-
 ### Repository Implementation (`:data` module)
-
-Create `DataRepositoryImpl` in the `:data` module under `data.repository`:
 
 ```kotlin
 package com.example.data.repository
 
 import com.example.core.networkresponse.error.Failure
 import com.example.core.networkresponse.response.ResultEither
-import com.example.data.mapper.DataDetailsMapper
+import com.example.core.networkresult.NetworkResult
 import com.example.data.mapper.DataListMapper
+import com.example.data.mapper.toDomain
 import com.example.data.remote.api.ApiService
 import com.example.data.remote.safecall.safeApiCall
-import com.example.domain.model.DataDetails
+import com.example.data.remote.safecall.safeApiCall_
 import com.example.domain.model.DataItem
 import com.example.domain.repository.DataRepository
 import javax.inject.Inject
 
 class DataRepositoryImpl @Inject constructor(
     private val apiService: ApiService,
-    private val dataListMapper: DataListMapper,
-    private val dataDetailsMapper: DataDetailsMapper
+    private val dataListMapper: DataListMapper // Needed for Approach A
 ) : DataRepository {
 
-    override suspend fun getDataList(): ResultEither<Failure, List<DataItem>> {
+    // Approach A: Class mapper with safeApiCall returning ResultEither
+    override suspend fun getDataListWithResultEither(): ResultEither<Failure, List<DataItem>> {
         return safeApiCall(
             apiCall = { apiService.getDataList() },
             mapper = { dataListMapper.map(it) }
         )
     }
 
-    override suspend fun getDataDetails(): ResultEither<Failure, List<DataDetails>> =
-        safeApiCall(
-            apiCall = { apiService.getDataDetails() },
-            mapper = { dataDetailsMapper.map(it) }
-            // Alternatively: mapper = { dtos -> dtos.toDomain() }
-        )
+    // Approach B: Extension mapper with safeApiCall_ returning NetworkResult
+    override suspend fun getDataList(): NetworkResult<List<DataItem>> =
+        safeApiCall_ { apiService.getDataList().toDomain() }
 }
 ```
 
