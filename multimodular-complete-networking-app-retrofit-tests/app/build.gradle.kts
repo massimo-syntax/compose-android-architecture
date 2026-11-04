@@ -69,4 +69,7 @@ dependencies {
     implementation(project(":navigation"))
     implementation(project(":feature:list:impl"))
     implementation(project(":feature:details:impl"))
+    implementation(project(":feature:login:impl"))
+    implementation(project(":feature:profile:impl"))
+    implementation(project(":feature:settings:impl"))
 }

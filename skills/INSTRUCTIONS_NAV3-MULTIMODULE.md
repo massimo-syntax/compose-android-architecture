@@ -295,3 +295,184 @@ class MainActivity : ComponentActivity() {
 - [ ] Navigation out of the feature happens via lambdas passed to the entry
 - [ ] `:navigation` gets the module dependencies and one line in `entryProvider { }`
 - [ ] No dependency between `:impl` modules
+
+
+## PART 2, navigation from-in-to Scaffold.
+### Navigation 3 – Multi-module setup (Login → Scaffold with bottom bar → Fullscreen)
+
+Instructions for a human or an AI to implement. Follow the module boundaries exactly.
+
+## 1. Goal
+
+- App starts on **Login** (mock, `loggedIn = false`). Pressing a button goes to **Main**.
+- **Main** is a `Scaffold` with a bottom bar and 3 tabs: `ScaffoldRoute1`, `ScaffoldRoute2`, `ScaffoldRoute3`.
+- Tabs **replace each other** (no history between tabs, no per-tab back stack).
+- From a tab, a click opens `AnotherFullscreen(id)`, shown **full screen, covering the bottom bar**. Back returns to the same tab.
+- `AnotherFullscreen` is a normal entry of the app-level NavDisplay, so any route can open it.
+
+## 2. Core idea: two NavDisplays, two back stacks
+
+| Level | Back stack contains | Shows |
+|---|---|---|
+| **Outer** (`AppNavDisplay`) | `Login`, `Main`, `AnotherFullscreen(id)` | Full-screen routes, no bottom bar |
+| **Inner** (`MainScaffold`) | exactly one tab key | The tab content inside the Scaffold |
+
+- The `Main` entry in the outer display hosts the Scaffold and the inner NavDisplay.
+- Opening a full-screen route from a tab pushes to the **outer** stack, so it covers the Scaffold. The `Main` entry stays below it, so back returns to the same tab.
+- Switching tabs = replacing the single key of the **inner** stack (`tabBackStack[0] = tab`), so it never grows. No navigator is needed there.
+
+## 3. Modules and what belongs to each
+
+### `:feature-login:api`
+```kotlin
+@Serializable data object Login : NavKey
+```
+
+### `:feature-login:impl`
+```kotlin
+fun EntryProviderScope<NavKey>.loginEntry(navigator: Navigator) {
+    entry<Login> { LoginScreen(onLoginClick = { navigator.replaceAll(Main) }) }
+}
+```
+`LoginScreen` takes plain lambdas only (previewable, no navigator inside).
+
+### `:feature-route1:api`, `:feature-route2:api`, `:feature-route3:api`
+```kotlin
+@Serializable data object ScaffoldRoute1 : NavKey   // in route1:api
+@Serializable data object ScaffoldRoute2 : NavKey   // in route2:api
+@Serializable data object ScaffoldRoute3 : NavKey   // in route3:api
+```
+
+### `:feature-route1:impl` (same pattern for 2 and 3)
+```kotlin
+fun EntryProviderScope<NavKey>.scaffoldRoute1Entry(appNavigator: Navigator) {
+    entry<ScaffoldRoute1> {
+        ScaffoldRoute1Screen(onItemClick = { id -> appNavigator.navigate(AnotherFullscreen(id)) })
+    }
+}
+```
+Important: tab entries receive the **app (outer) navigator**, because anything fullscreen must go to the outer stack.
+
+### `:feature-fullscreen:api`
+```kotlin
+@Serializable data class AnotherFullscreen(val id: String) : NavKey
+```
+Keys carry primitives only, never domain models.
+
+### `:feature-fullscreen:impl`
+```kotlin
+fun EntryProviderScope<NavKey>.anotherFullscreenEntry(appNavigator: Navigator) {
+    entry<AnotherFullscreen> { key ->
+        AnotherFullscreenScreen(id = key.id, onBack = appNavigator::goBack)
+    }
+}
+```
+If the ViewModel needs the id, inject it with Hilt assisted injection (`hiltViewModel` with a creation callback), keeping the screen free of navigation types.
+
+### `:navigation`
+Depends on every `:api` and `:impl`. It owns `Main`, the `Navigator`, and both displays.
+
+```kotlin
+@Serializable data object Main : NavKey
+
+class Navigator(private val backStack: NavBackStack) {
+    fun navigate(key: NavKey) { backStack.add(key) }
+    fun goBack() { backStack.removeLastOrNull() }
+    fun replaceAll(key: NavKey) { backStack.clear(); backStack.add(key) }
+}
+```
+
+Outer display:
+```kotlin
+@Composable
+fun AppNavDisplay() {
+    val backStack = rememberNavBackStack(Login)
+    val appNavigator = remember(backStack) { Navigator(backStack) }
+
+    NavDisplay(
+        backStack = backStack,
+        onBack = appNavigator::goBack,
+        entryProvider = entryProvider {
+            loginEntry(appNavigator)
+            anotherFullscreenEntry(appNavigator)
+            entry<Main> { MainScaffold(appNavigator) }
+        }
+    )
+}
+```
+
+Inner display (bottom bar):
+```kotlin
+private val tabs = listOf(ScaffoldRoute1, ScaffoldRoute2, ScaffoldRoute3)
+
+@Composable
+fun MainScaffold(appNavigator: Navigator) {
+    val tabBackStack = rememberNavBackStack(ScaffoldRoute1)
+    val current = tabBackStack.last()
+
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                tabs.forEach { tab ->
+                    NavigationBarItem(
+                        selected = current == tab,
+                        onClick = { tabBackStack[0] = tab },   // replace the single key
+                        icon = { /* icon per tab */ },
+                        label = { /* label per tab */ }
+                    )
+                }
+            }
+        }
+    ) { padding ->
+        NavDisplay(
+            modifier = Modifier.padding(padding),
+            backStack = tabBackStack,
+            onBack = { /* single entry, never pops */ },
+            entryProvider = entryProvider {
+                scaffoldRoute1Entry(appNavigator)
+                scaffoldRoute2Entry(appNavigator)
+                scaffoldRoute3Entry(appNavigator)
+            }
+        )
+    }
+}
+```
+
+## 4. Rules (do not break)
+
+1. Screens (composables) expose **plain lambdas** (`onItemClick`, `onBack`). Only **entries** touch the `Navigator`.
+2. Keys live in `:api`, entries and screens in `:impl`, displays and `Main` in `:navigation`.
+3. `:impl` modules never depend on other `:impl` modules. Cross-feature navigation uses keys from `:api`.
+4. Only one navigator exists: `appNavigator` (outer stack). The inner tab stack has no navigator; the bottom bar swaps its single key directly. Tab entries get `appNavigator` for fullscreen routes.
+5. The `Navigator` only wraps the stack that `rememberNavBackStack` owns. Do **not** make it a singleton with its own list (it would lose process-death restore).
+6. Login: use `replaceAll(Main)` so back never returns to Login.
+7. System back: the inner display has one entry, so back falls through to the outer one.
+
+## 5. Two buttons switching two views inside one tab
+
+Do **not** add another back stack. Use local state (segmented buttons) or a `HorizontalPager` if swiping is wanted. A pager is a fine choice.
+
+```kotlin
+enum class Section { A, B }
+var section by rememberSaveable { mutableStateOf(Section.A) }
+// when (section) { A -> ContentA(); B -> ContentB() }
+```
+
+Use a nested stack only if the sub-screens need their own history, args, deep links, or belong to different modules.
+
+## 6. Out of scope for now
+
+- Per-tab history (each tab with its own stack).
+- Hilt multibinding of entries (`:navigation` calls entries directly).
+- Real auth state (later: choose the start key from a ViewModel, `if (loggedIn) Main else Login`).
+
+## 7. Checklist
+
+- [ ] Login → Main clears the stack
+- [ ] Tabs replace each other, stack size stays 1
+- [ ] Tab click on an item opens `AnotherFullscreen(id)` without the bottom bar
+- [ ] Back from `AnotherFullscreen` returns to the same tab
+- [ ] Back from `Main` exits the app
+- [ ] Builds with each `:impl` depending only on `:api` modules, never on another `:impl`
+
+Note: the `rememberNavBackStack(key)` overload without serializers needs a recent Navigation 3 version. On older alphas, pass the configuration/serializers explicitly.

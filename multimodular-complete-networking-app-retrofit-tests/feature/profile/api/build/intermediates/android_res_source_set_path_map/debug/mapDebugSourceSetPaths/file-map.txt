@@ -1,0 +1,9 @@
+com.example.feature.profile.api-pngs-0 /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/feature/profile/api/build/generated/res/pngs/debug
+com.example.feature.profile.api-updated_navigation_xml-1 /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/feature/profile/api/build/generated/updated_navigation_xml/debug
+com.example.feature.profile.api-mergeDebugResources-2 /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/feature/profile/api/build/intermediates/incremental/debug/mergeDebugResources/merged.dir
+com.example.feature.profile.api-mergeDebugResources-3 /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/feature/profile/api/build/intermediates/incremental/debug/mergeDebugResources/stripped.dir
+com.example.feature.profile.api-debug-4 /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/feature/profile/api/build/intermediates/merged_res/debug/mergeDebugResources
+com.example.feature.profile.api-debug-5 /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/feature/profile/api/build/intermediates/packaged_res/debug/packageDebugResources
+com.example.feature.profile.api-debug-6 /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/feature/profile/api/src/debug/res
+com.example.feature.profile.api-main-7 /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/feature/profile/api/src/main/res
+gradleHome-0 /root/.gradle

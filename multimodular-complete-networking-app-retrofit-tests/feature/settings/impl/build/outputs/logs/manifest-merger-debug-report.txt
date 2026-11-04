@@ -1,0 +1,16 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/feature/settings/impl/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest710145980961304863.xml:2:13-83
+INJECTED from /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/feature/settings/impl/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest710145980961304863.xml:2:13-83
+	package
+		INJECTED from /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/feature/settings/impl/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest710145980961304863.xml
+	xmlns:android
+		ADDED from /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/feature/settings/impl/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest710145980961304863.xml:2:23-81
+uses-sdk
+INJECTED from /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/feature/settings/impl/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest710145980961304863.xml reason: use-sdk injection requested
+INJECTED from /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/feature/settings/impl/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest710145980961304863.xml
+INJECTED from /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/feature/settings/impl/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest710145980961304863.xml
+	android:targetSdkVersion
+		INJECTED from /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/feature/settings/impl/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest710145980961304863.xml
+	android:minSdkVersion
+		INJECTED from /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/feature/settings/impl/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest710145980961304863.xml
