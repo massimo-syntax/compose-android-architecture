@@ -30,6 +30,8 @@ android {
 
 dependencies {
     implementation(project(":feature:list:api"))
+    implementation(project(":feature:details:api"))
+    implementation(project(":navigation:api"))
     implementation(project(":ui"))
     implementation(project(":core"))
     implementation(project(":domain"))

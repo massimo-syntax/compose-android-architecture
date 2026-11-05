@@ -28,6 +28,8 @@ android {
 }
 
 dependencies {
+    api(project(":navigation:api"))
+    implementation(project(":core"))
     api(project(":feature:list:api"))
     implementation(project(":feature:list:impl"))
     implementation(project(":feature:details:api"))
@@ -48,4 +50,6 @@ dependencies {
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.kotlinx.serialization.json)
+
+    testImplementation(libs.junit)
 }

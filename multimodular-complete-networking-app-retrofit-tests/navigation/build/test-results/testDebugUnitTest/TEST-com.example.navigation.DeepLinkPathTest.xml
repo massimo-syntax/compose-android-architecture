@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.navigation.DeepLinkPathTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-05T20:51:21.984Z" hostname="hostname" time="0.143">
+  <properties/>
+  <testcase name="testUnknownOrNullDeepLinkFallback" classname="com.example.navigation.DeepLinkPathTest" time="0.056"/>
+  <testcase name="testSettingsDeepLink" classname="com.example.navigation.DeepLinkPathTest" time="0.001"/>
+  <testcase name="testEmailDetailsDeepLink" classname="com.example.navigation.DeepLinkPathTest" time="0.048"/>
+  <testcase name="testProfileSubTabDeepLink" classname="com.example.navigation.DeepLinkPathTest" time="0.001"/>
+  <testcase name="testEmailDetailsDeepLinkWithScheme" classname="com.example.navigation.DeepLinkPathTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

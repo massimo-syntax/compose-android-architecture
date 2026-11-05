@@ -5,7 +5,7 @@ import androidx.navigation3.runtime.NavKey
 import com.example.feature.profile.api.ProfileKey
 
 fun EntryProviderScope<NavKey>.profileEntry() {
-    entry<ProfileKey> {
-        ProfileScreen()
+    entry<ProfileKey> { key ->
+        ProfileScreen(initialSubTab = key.subTab)
     }
 }

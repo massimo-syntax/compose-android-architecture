@@ -4,9 +4,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.example.feature.details.api.EmailDetailsKey
+import com.example.navigation.api.Navigator
 
 fun EntryProviderScope<NavKey>.emailDetailsEntry(
-    onNavigateBack: () -> Unit
+    appNavigator: Navigator
 ) {
     entry<EmailDetailsKey> { key ->
         val viewModel = hiltViewModel<EmailDetailsViewModel, EmailDetailsViewModel.Factory>(
@@ -14,7 +15,7 @@ fun EntryProviderScope<NavKey>.emailDetailsEntry(
         )
         EmailDetailsScreen(
             viewModel = viewModel,
-            onNavigateBack = onNavigateBack
+            onNavigateBack = appNavigator::goBack
         )
     }
 }

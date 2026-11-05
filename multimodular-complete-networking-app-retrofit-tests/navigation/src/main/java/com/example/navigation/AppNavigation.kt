@@ -14,45 +14,31 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.example.feature.details.api.EmailDetailsKey
 import com.example.feature.details.impl.emailDetailsEntry
 import com.example.feature.list.api.EmailListKey
 import com.example.feature.list.impl.emailListEntry
-import com.example.feature.login.api.LoginKey
 import com.example.feature.login.impl.loginEntry
 import com.example.feature.profile.api.ProfileKey
+import com.example.feature.profile.api.ProfileSubTab
 import com.example.feature.profile.impl.profileEntry
 import com.example.feature.settings.api.SettingsKey
 import com.example.feature.settings.impl.settingsEntry
-import kotlinx.serialization.Serializable
-
-@Serializable
-data object MainKey : NavKey
-
-class Navigator(private val backStack: NavBackStack<NavKey>) {
-    fun navigate(key: NavKey) {
-        backStack.add(key)
-    }
-
-    fun goBack() {
-        backStack.removeLastOrNull()
-    }
-
-    fun replaceAll(key: NavKey) {
-        backStack.clear()
-        backStack.add(key)
-    }
-}
+import com.example.navigation.api.MainKey
+import com.example.navigation.api.MainTab
+import com.example.navigation.api.Navigator
 
 @Composable
-fun AppNavigation(modifier: Modifier = Modifier) {
-    val backStack = rememberNavBackStack(LoginKey)
+fun AppNavigation(
+    modifier: Modifier = Modifier,
+    deepLink: String? = "deeplink://emaillist/emaildetails/email-001"
+) {
+    val deepLinkPath = remember(deepLink) { DeepLinkPath(deepLink).stack }
+    val backStack = rememberNavBackStack(*deepLinkPath.toTypedArray())
     val appNavigator = remember(backStack) { Navigator(backStack) }
 
     NavDisplay(
@@ -65,27 +51,35 @@ fun AppNavigation(modifier: Modifier = Modifier) {
         ),
         entryProvider = entryProvider {
             loginEntry(
-                onLoginClick = { appNavigator.replaceAll(MainKey) }
+                onLoginClick = {
+                    val path = DeepLinkPath(deepLink)
+                    appNavigator.setStack(path.stack)
+                }
             )
-            emailDetailsEntry(
-                onNavigateBack = appNavigator::goBack
-            )
-            entry<MainKey> {
-                MainScaffold(appNavigator = appNavigator)
+            emailDetailsEntry(appNavigator)
+            entry<MainKey> { key ->
+                MainScaffold(
+                    initialTab = key.tab,
+                    initialSubTab = key.subTab,
+                    appNavigator = appNavigator
+                )
             }
         },
     )
 }
 
-private val tabs = listOf(EmailListKey, ProfileKey, SettingsKey)
+private val tabs = listOf(MainTab.EMAILLIST, MainTab.PROFILE, MainTab.SETTINGS)
 
 @Composable
 fun MainScaffold(
     appNavigator: Navigator,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    initialTab: MainTab = MainTab.EMAILLIST,
+    initialSubTab: String? = null
 ) {
-    val tabBackStack = rememberNavBackStack(EmailListKey)
-    val currentTab = tabBackStack.lastOrNull() ?: EmailListKey
+    val tabBackStack = rememberNavBackStack(initialTab.toKey(initialSubTab))
+    val currentKey = tabBackStack.lastOrNull() ?: initialTab.toKey(initialSubTab)
+    val currentTab = currentKey.toTab()
 
     Scaffold(
         modifier = modifier,
@@ -96,24 +90,23 @@ fun MainScaffold(
                         selected = currentTab == tab,
                         onClick = {
                             if (currentTab != tab) {
-                                tabBackStack[0] = tab
+                                tabBackStack.clear()
+                                tabBackStack.add(tab.toKey(null))
                             }
                         },
                         icon = {
                             val icon = when (tab) {
-                                is EmailListKey -> Icons.Default.Email
-                                is ProfileKey -> Icons.Default.Person
-                                is SettingsKey -> Icons.Default.Settings
-                                else -> Icons.Default.Email
+                                MainTab.EMAILLIST -> Icons.Default.Email
+                                MainTab.PROFILE -> Icons.Default.Person
+                                MainTab.SETTINGS -> Icons.Default.Settings
                             }
                             Icon(imageVector = icon, contentDescription = null)
                         },
                         label = {
                             val label = when (tab) {
-                                is EmailListKey -> "Emails"
-                                is ProfileKey -> "Profile"
-                                is SettingsKey -> "Settings"
-                                else -> ""
+                                MainTab.EMAILLIST -> "Emails"
+                                MainTab.PROFILE -> "Profile"
+                                MainTab.SETTINGS -> "Settings"
                             }
                             Text(label)
                         }
@@ -131,14 +124,22 @@ fun MainScaffold(
                 rememberViewModelStoreNavEntryDecorator(),
             ),
             entryProvider = entryProvider {
-                emailListEntry(
-                    onNavigateToDetails = { id ->
-                        appNavigator.navigate(EmailDetailsKey(id))
-                    }
-                )
+                emailListEntry(appNavigator)
                 profileEntry()
                 settingsEntry()
             }
         )
     }
+}
+
+private fun MainTab.toKey(subTab: String?): NavKey = when (this) {
+    MainTab.EMAILLIST -> EmailListKey
+    MainTab.PROFILE -> ProfileKey(ProfileSubTab.from(subTab))
+    MainTab.SETTINGS -> SettingsKey
+}
+
+private fun NavKey.toTab(): MainTab = when (this) {
+    is ProfileKey -> MainTab.PROFILE
+    is SettingsKey -> MainTab.SETTINGS
+    else -> MainTab.EMAILLIST
 }

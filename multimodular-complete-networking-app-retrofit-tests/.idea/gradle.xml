@@ -30,6 +30,7 @@
             <option value="$PROJECT_DIR$/feature/settings/api" />
             <option value="$PROJECT_DIR$/feature/settings/impl" />
             <option value="$PROJECT_DIR$/navigation" />
+            <option value="$PROJECT_DIR$/navigation/api" />
             <option value="$PROJECT_DIR$/ui" />
           </set>
         </option>

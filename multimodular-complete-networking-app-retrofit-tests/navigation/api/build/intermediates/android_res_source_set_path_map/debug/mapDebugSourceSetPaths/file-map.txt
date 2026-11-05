@@ -1,0 +1,9 @@
+com.example.navigation.api-pngs-0 /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/navigation/api/build/generated/res/pngs/debug
+com.example.navigation.api-updated_navigation_xml-1 /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/navigation/api/build/generated/updated_navigation_xml/debug
+com.example.navigation.api-mergeDebugResources-2 /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/navigation/api/build/intermediates/incremental/debug/mergeDebugResources/merged.dir
+com.example.navigation.api-mergeDebugResources-3 /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/navigation/api/build/intermediates/incremental/debug/mergeDebugResources/stripped.dir
+com.example.navigation.api-debug-4 /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/navigation/api/build/intermediates/merged_res/debug/mergeDebugResources
+com.example.navigation.api-debug-5 /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/navigation/api/build/intermediates/packaged_res/debug/packageDebugResources
+com.example.navigation.api-debug-6 /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/navigation/api/src/debug/res
+com.example.navigation.api-main-7 /home/name/Desktop/compose-android-architecture/multimodular-complete-networking-app-retrofit-tests/navigation/api/src/main/res
+gradleHome-0 /root/.gradle
