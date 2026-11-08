@@ -4,7 +4,8 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class Data(
-    val id: Int,
-    val name: String
+data class Todo(
+    val id: Long,
+    val title: String
 )
+

@@ -1,88 +1,108 @@
 package com.example
 
-import com.example.model.Data
+import com.example.configurerouting.crudRoutes
+import com.example.configurerouting.queryParameters
+import com.example.configurerouting.withRouteParameters
+import com.example.errorresponses.NotFoundException
+import com.example.errorresponses.ValidationException
+import com.example.model.Todo
+import com.example.reqres.ApiResponse
+import com.example.reqres.CreateUserRequest
+import com.example.reqres.User
+import com.example.routesextensions.productRoutes
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
-import io.ktor.server.engine.EngineConnectorBuilder
-import io.ktor.server.engine.embeddedServer
+import io.ktor.server.request.receive
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.server.http.content.*
-import io.ktor.server.netty.Netty
-import io.ktor.server.request.receive
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
-import kotlin.collections.emptyList
 
 fun Application.configureRouting() {
-
-    val data = mutableListOf(
-        Data(0, "hello"),
-        Data(1, "hello1"),
-        Data(2, "hello2"),
-        Data(3, "hello3"),
-        Data(4, "hello4"),
-    )
-
     routing {
-        staticResources("/static", "static")
-
         get("/") {
-            call.respondText("Hello, World!")
+            call.respondText("Hello, Ktor!")
         }
-
-        get("/data") {
-            call.respond(data)
+        // ping
+        get("/health") {
+            call.respondText("OK")
         }
+        // more modular by Application. scope
+        crudRoutes()
+        withRouteParameters()
+        queryParameters()
 
-        route("/data"){
+        //Grouping Routes with route()
+        // API version prefix
+        route("/api/v2") {
+            // User routes
+            route("/users") {
 
-            get("/contains/{str}") {
-                val param = call.parameters["str"]
-                call.respond {
-                    if (param != null) {
-                        data.filter { it.name.contains(param) }
-                    } else {
-                        emptyList()
+                get("/{id}") {
+                    val id = call.parameters["id"]?.toLongOrNull()
+                        ?: throw ValidationException("Invalid user ID format")
+
+                    val todos = mutableListOf<Todo>()
+                    val todo = todos.firstOrNull { it.id == id }
+                        ?: throw NotFoundException("User with ID $id not found")
+
+                    call.respond(ApiResponse(success = true, data = todo))
+                }
+
+                post {
+                    // POST - create user from JSON body
+                    post {
+                        createUser(call)
+                    }
+                }
+                route("/{id}") {
+                    get { /* get user by id */ }
+                    put { /* update user */ }
+                    delete { /* delete user */ }
+                    // Nested resources
+                    route("/orders") {
+                        get { /* get user's orders */ }
                     }
                 }
             }
+        }
 
-            get("/id/{id}"){
-                val id = call.parameters["id"]?.toInt()
-                if(id == null){
-                    call.respond(HttpStatusCode.BadRequest)
-                    return@get
-                }
-
-                val data = data.firstOrNull { it.id == id }
-                if(data == null){
-                    //call.respond(HttpStatusCode.NotFound)
-                    call.respond(emptyList<Data>())
-                    return@get
-                }
-
-                call.respond(data)
-            }
-
-
-            post{
-                try{
-                    val dt = call.receive<Data>()
-                    data.add(dt)
-                    call.respond(HttpStatusCode.Created)
-                } catch (e: Exception) {
-                    if (e is CancellationException) {
-                        currentCoroutineContext().ensureActive()
-                    }
-                    call.respond(e.message ?: "Something went wrong")
-                }
-            }
+        // Modular Route by Route. extensions
+        route("/api/v1") {
+            // Include route modules
+            productRoutes()
 
         }
+
 
     }
+}
 
+suspend fun ApplicationCall.createTodo() {
+    val request = receive<Todo>()
+    val newUser = Todo(0, request.title)
+    // insert in db
+    respond(
+        HttpStatusCode.Created,
+        ApiResponse(success = true, data = newUser)
+    )
 
 }
+
+private suspend fun createUser(call: ApplicationCall) {
+    // Receive and deserialize JSON body
+    val request = call.receive<CreateUserRequest>()
+
+    // Create user (simulate database insert)
+    val newUser = User(
+        id = 1,
+        name = request.name,
+        email = request.email
+    )
+
+    call.respond(
+        HttpStatusCode.Created,
+        ApiResponse(success = true, data = newUser)
+    )
+
+}
+
+
