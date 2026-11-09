@@ -15,6 +15,25 @@ application {
 kotlin {
     jvmToolchain(21)
 }
+
+// docker
+ktor {
+    docker {
+        // ...
+        jreVersion.set(JavaVersion.VERSION_21) // same as toolchain
+        localImageName.set("sample-docker-image")
+        imageTag.set("0.0.1")
+        externalRegistry.set(
+            io.ktor.plugin.features.DockerImageRegistry.dockerHub(
+                appName = provider { "ktor-app" },
+                username = providers.environmentVariable("DOCKER_HUB_USERNAME"),
+                password = providers.environmentVariable("DOCKER_HUB_PASSWORD")
+            )
+        )
+    }
+}
+
+
 dependencies {
     implementation(ktorLibs.server.config.yaml)
     // core
@@ -34,8 +53,6 @@ dependencies {
     // Authentication
     implementation("io.ktor:ktor-server-auth-jvm")
     implementation("io.ktor:ktor-server-auth-jwt-jvm")
-
-
 
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
