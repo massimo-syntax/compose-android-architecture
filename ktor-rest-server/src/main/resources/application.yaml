@@ -5,4 +5,12 @@ ktor:
   application:
     modules:
       - com.example.SerializationKt.configureSerialization
+      - com.example.errorresponses.CustomErrorResponsesKt.configureStatusPages
+      - com.example.SecurityJwtKt.configureSecurity
       - com.example.RoutingKt.configureRouting
+
+jwt:
+  secret: "secret"
+  issuer: "http://0.0.0.0:8080/"
+  audience: "http://0.0.0.0:8080/protected"
+  realm: "Access to protected routes"

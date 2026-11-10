@@ -54,6 +54,12 @@ dependencies {
     implementation("io.ktor:ktor-server-auth-jvm")
     implementation("io.ktor:ktor-server-auth-jwt-jvm")
 
+    implementation("io.ktor:ktor-server-auth")
+    implementation("io.ktor:ktor-server-auth-jwt")
+
+    // crypt
+    implementation("org.mindrot:jbcrypt:0.4")
+
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
 }

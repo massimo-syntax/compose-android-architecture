@@ -1,5 +1,6 @@
 package com.example
 
+import com.example.auth.authRoutes
 import com.example.configurerouting.crudRoutes
 import com.example.configurerouting.queryParameters
 import com.example.configurerouting.withRouteParameters
@@ -12,6 +13,9 @@ import com.example.reqres.User
 import com.example.routesextensions.productRoutes
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -34,13 +38,13 @@ fun Application.configureRouting() {
         // API version prefix
         route("/api/v2") {
             // User routes
-            route("/users") {
+            route("/todos") {
 
                 get("/{id}") {
                     val id = call.parameters["id"]?.toLongOrNull()
                         ?: throw ValidationException("Invalid user ID format")
 
-                    val todos = mutableListOf<Todo>()
+                    val todos = mutableListOf(Todo(0, "My Todo"))
                     val todo = todos.firstOrNull { it.id == id }
                         ?: throw NotFoundException("User with ID $id not found")
 
@@ -48,10 +52,8 @@ fun Application.configureRouting() {
                 }
 
                 post {
-                    // POST - create user from JSON body
-                    post {
-                        createUser(call)
-                    }
+                    // POST - create todo from JSON body
+                    createTodo()
                 }
                 route("/{id}") {
                     get { /* get user by id */ }
@@ -72,17 +74,34 @@ fun Application.configureRouting() {
 
         }
 
+        // register, login
+        authRoutes()
 
+        authenticate("auth-jwt") {
+            route("/protected") {
+                get("/profile") {
+                    val principal = call.principal<JWTPrincipal>()
+                    val payload = principal!!.payload
+                    val username = payload.getClaim("username").asString()
+                    val now = System.currentTimeMillis()
+                    val expiresAt = principal.expiresAt?.time?.minus(now)
+                    call.respondText("Hello, $username! " + "Token is expired at $expiresAt ms.")
+                }
+            }
+        }
     }
+
+
 }
 
-suspend fun ApplicationCall.createTodo() {
-    val request = receive<Todo>()
-    val newUser = Todo(0, request.title)
+
+suspend fun RoutingContext.createTodo() {
+    val request = call.receive<Todo>()
+    val newTodo = Todo(0, request.title)
     // insert in db
-    respond(
+    call.respond(
         HttpStatusCode.Created,
-        ApiResponse(success = true, data = newUser)
+        ApiResponse(success = true, data = newTodo)
     )
 
 }
