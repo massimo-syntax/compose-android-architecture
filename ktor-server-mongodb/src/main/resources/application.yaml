@@ -1,0 +1,12 @@
+ktor:
+  deployment:
+    port: 8080
+  application:
+    modules:
+      - com.example.configuration.ConfigureGsonKt.configureGson # serialization
+      - com.example.configuration.ConfigureDIKt.configureDi
+      - com.example.RoutingKt.configureRouting
+
+  mongo:
+    uri: mongodb+srv://massimoganzerli_db_user:1CvK1pGGjcqK1lpk@cluster0.d0z4t2h.mongodb.net/
+    database: ktormongodbfitness
