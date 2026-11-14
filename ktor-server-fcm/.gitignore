@@ -1,0 +1,27 @@
+# Build output
+build/
+
+# Gradle
+.gradle/
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Kotlin
+.kotlin/
+
+# IntelliJ
+out/
+
+# FCM Service Account (contains sensitive credentials)
+fcm-service-account.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
