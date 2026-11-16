@@ -1,6 +1,8 @@
 package com.example
 
+import com.example.db.initDb
 import com.example.di.configureKoin
+import com.example.routing.configureRouting
 import io.ktor.server.application.Application
 
 fun main(args: Array<String>) {
@@ -10,6 +12,7 @@ fun main(args: Array<String>) {
 fun Application.module() {
     configureKoin()
     configureSerialization()
+    initDb()
     //configureSecurity()
     configureRouting()
 }

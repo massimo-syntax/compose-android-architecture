@@ -47,6 +47,8 @@ dependencies {
     // mysql
     implementation("io.asyncer:r2dbc-mysql:1.3.2")
 
+    // encryption
+    implementation("org.mindrot:jbcrypt:0.4")
 
 
     testImplementation(kotlin("test"))

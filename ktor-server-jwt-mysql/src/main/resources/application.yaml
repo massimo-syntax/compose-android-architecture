@@ -9,3 +9,4 @@ database:
   url: "r2dbc:mysql://localhost:3306/my_db_112233"
   driver: "mysql"
   user: "user_ktor_112233"
+  password: "password"
