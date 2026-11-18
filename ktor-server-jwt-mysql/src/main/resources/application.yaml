@@ -10,3 +10,11 @@ database:
   driver: "mysql"
   user: "user_ktor_112233"
   password: "password"
+
+jwt:
+  secret: "190ks340$)(/93_4j2%394=8257+2938457k-2%094k0.k2934,8579§$52043(98kr20=938ruk294rk02}?&%!4957k203#4k05d$/&%"
+  domain: "http://0.0.0.0:8080"
+  audience: "client"
+  issuer: "http://0.0.0.0:8080"
+  realm: "Access user table on database, or read dedicated blogs"
+  claimField: "id"
