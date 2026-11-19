@@ -13,6 +13,5 @@ fun Application.module() {
     configureKoin()
     configureSerialization()
     initDb()
-    configureSecurity()
     configureRouting()
 }

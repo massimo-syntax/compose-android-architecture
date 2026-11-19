@@ -28,9 +28,6 @@ dependencies {
     // serialization
     implementation(ktorLibs.serialization.kotlinx.json)
     implementation(ktorLibs.server.contentNegotiation)
-    // jwt auth
-    implementation(ktorLibs.server.auth)
-    implementation(ktorLibs.server.auth.jwt)
 
     // exposed sql connections
     implementation(libs.exposed.core)

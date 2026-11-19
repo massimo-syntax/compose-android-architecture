@@ -11,8 +11,6 @@ Here's a list of features included in this project at project creation:
 | [kotlinx.serialization](https://start.ktor.io/p/io.ktor/server-kotlinx-serialization) | Handles JSON serialization using kotlinx.serialization library |
 | [Content Negotiation](https://start.ktor.io/p/io.ktor/server-content-negotiation) | Provides automatic content conversion according to Content-Type and Accept headers |
 | [Exposed](https://start.ktor.io/p/org.jetbrains/server-exposed) | Adds Exposed database to your application |
-| [Authentication](https://start.ktor.io/p/io.ktor/server-auth) | Provides extension point for handling the Authorization header |
-| [Authentication JWT](https://start.ktor.io/p/io.ktor/server-auth-jwt) | Handles JSON Web Token (JWT) bearer authentication scheme |
 
 
 ## Building & Running
@@ -169,4 +167,188 @@ database:
   url: "r2dbc:mysql://localhost:3306/my_db_112233"
   driver: "mysql"
   user: "user_ktor_112233"
+```
+
+---
+
+## Project Dependencies
+
+The main dependencies used in this project:
+
+```kotlin
+// exposed sql connections
+implementation(libs.exposed.core)
+implementation(libs.exposed.r2dbc)
+
+// dao
+implementation("org.jetbrains.exposed:exposed-dao-r2dbc:1.6.1")
+
+// h2 database
+implementation(libs.h2database.h2)
+implementation(libs.h2database.r2dbc)
+
+// mysql
+implementation("io.asyncer:r2dbc-mysql:1.3.2")
+
+// encryption
+implementation("org.mindrot:jbcrypt:0.4")
+```
+
+---
+
+## Database Tables
+
+### UsersTable
+
+```kotlin
+object UsersTable : ULongIdTable() {
+    val name = varchar("name", length = 50)
+    val password = varchar("password", 256)
+}
+```
+
+### BlogsTable
+
+```kotlin
+object BlogsTable : ULongIdTable() {
+    val title = varchar("title", length = 200)
+    val content = text("content")
+    val author = reference(
+        "user_id",
+        UsersTable.id,
+        onDelete = ReferenceOption.CASCADE
+    )
+}
+```
+
+---
+
+## DAO Entities
+
+DAO entities provide easy transactions with the database.
+
+### UserEntity
+
+```kotlin
+class UserEntity(id: EntityID<ULong>) : ULongEntity(id) {
+    companion object : ULongEntityClass<UserEntity>(UsersTable)
+
+    var name by UsersTable.name
+    var password by UsersTable.password
+
+    fun toUser() = User(
+        id = id.value.toLong(),
+        name = name,
+    )
+}
+```
+
+### BlogEntity
+
+```kotlin
+class BlogEntity(id: EntityID<ULong>) : ULongEntity(id) {
+    companion object : ULongEntityClass<BlogEntity>(BlogsTable)
+
+    var title by BlogsTable.title
+    var content by BlogsTable.content
+    val author by UserEntity referencedOn BlogsTable.author
+}
+```
+
+---
+
+## Repository Layer
+
+The entities above are used in repositories and services.
+
+### `dbQuery` Helper
+
+`dbQuery` is a helper function, almost an alias for `suspendTransaction {}`:
+
+```kotlin
+suspend fun <T : Any> dbQuery(block: suspend () -> T?): T? =
+    suspendTransaction { block() }
+```
+
+### UserRepositoryImpl
+
+```kotlin
+class UserRepositoryImpl : UserRepository {
+    override suspend fun createUser(userRequest: UserAuthRequest): User? = dbQuery {
+        val entity = UserEntity.find { UsersTable.name eq userRequest.username }.firstOrNull()
+        if (entity != null)
+            return@dbQuery entity.toUser()
+
+        UserEntity.newSuspend {
+            name = userRequest.username
+            password = hashPassword(userRequest.password)
+        }.toUser()
+    }
+
+    override suspend fun getUserById(id: Long): User? = dbQuery {
+        UserEntity.findById(id.toULong())?.toUser()
+    }
+
+    override suspend fun authenticate(userRequest: UserAuthRequest): User? = dbQuery {
+        val entity = UserEntity.find { UsersTable.name eq userRequest.username }.firstOrNull()
+        entity?.takeIf {
+            isPasswordHash(userRequest.password, it.password)
+        }?.toUser()
+    }
+
+    override fun hashPassword(password: String): String =
+        BCrypt.hashpw(password, BCrypt.gensalt())
+
+    override fun isPasswordHash(plainText: String, hashed: String): Boolean =
+        BCrypt.checkpw(plainText, hashed)
+
+    override suspend fun updateUser(user: User): User? = dbQuery {
+        UserEntity.findByIdAndUpdate(user.id.toULong()) {
+            it.name = user.name
+        }?.toUser()
+    }
+
+    override suspend fun deleteUser(id: Long): Boolean {
+        val entity = dbQuery {
+            UserEntity.findById(id.toULong())
+        }?.also { it.delete() }
+        return entity != null
+    }
+}
+```
+
+### BlogsRepositoryImpl
+
+```kotlin
+class BlogsRepositoryImpl : BlogsRepository {
+
+    override suspend fun createBlog(userId: Long, request: BlogRequest): Blog = dbQuery {
+        val user = UserEntity.findById(userId.toULong())
+            ?: throw IllegalArgumentException("User with id $userId not found")
+
+        val blogEntity = BlogEntity.newSuspend {
+            title = request.title
+            content = request.content
+            author.set(user)
+        }
+
+        Blog(
+            id = blogEntity.id.value.toLong(),
+            title = blogEntity.title,
+            content = blogEntity.content,
+            author = blogEntity.author().toUser()
+        )
+    } ?: throw IllegalStateException("Failed to create blog")
+
+    override suspend fun getAll(): List<Blog> = dbQuery {
+        BlogEntity.all().toList().map { entity ->
+            Blog(
+                id = entity.id.value.toLong(),
+                title = entity.title,
+                content = entity.content,
+                author = entity.author().toUser()
+            )
+        }
+    } ?: emptyList()
+}
 ```

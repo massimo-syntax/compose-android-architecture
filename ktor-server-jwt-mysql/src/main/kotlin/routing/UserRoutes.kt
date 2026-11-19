@@ -15,7 +15,6 @@ import io.ktor.server.routing.route
 
 fun Routing.userRoutes(userRepository: UserRepository) {
     route("/users") {
-        // Create user
         post {
             val userRequest = call.receive<UserAuthRequest>()
             val user = userRepository.createUser(userRequest)
@@ -26,7 +25,6 @@ fun Routing.userRoutes(userRepository: UserRepository) {
             }
         }
 
-        // Read user
         get("/{id}") {
             val id = call.parameters["id"]?.toLong() ?: throw IllegalArgumentException("Invalid ID")
             val user = userRepository.getUserById(id)
@@ -37,7 +35,6 @@ fun Routing.userRoutes(userRepository: UserRepository) {
             }
         }
 
-        // Update user
         put("/{id}") {
             val id = call.parameters["id"]?.toLong() ?: throw IllegalArgumentException("Invalid ID")
             val user = call.receive<User>()
@@ -45,7 +42,6 @@ fun Routing.userRoutes(userRepository: UserRepository) {
             call.respond(HttpStatusCode.NoContent)
         }
 
-        // Delete user
         delete("/{id}") {
             val id = call.parameters["id"]?.toLong() ?: throw IllegalArgumentException("Invalid ID")
             userRepository.deleteUser(id)

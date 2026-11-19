@@ -12,7 +12,6 @@ fun Application.configureKoin(){
         slf4jLogger()
         modules(
             listOf(
-                // access config, jwt needs that
                 module { single<ApplicationConfig> { environment.config } },
                 repositoryModule,
                 servicesModule
