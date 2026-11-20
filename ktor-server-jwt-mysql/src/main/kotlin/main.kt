@@ -12,6 +12,7 @@ fun main(args: Array<String>) {
 fun Application.module() {
     configureKoin()
     configureSerialization()
+    configureSecurity()
     initDb()
     configureRouting()
 }

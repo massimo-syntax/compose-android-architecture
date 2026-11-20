@@ -21,6 +21,9 @@ dependencies {
     implementation(ktorLibs.server.netty)
     implementation(ktorLibs.server.config.yaml)
     implementation(libs.logback.classic)
+    // JWT auth
+    implementation("io.ktor:ktor-server-auth-jwt-jvm")
+
     // koin
     implementation("io.insert-koin:koin-ktor:4.2.2")
     implementation("io.insert-koin:koin-logger-slf4j:4.2.2")

@@ -13,13 +13,11 @@ import org.mindrot.jbcrypt.BCrypt
 class UserRepositoryImpl : UserRepository {
     override suspend fun createUser(userRequest: UserAuthRequest): User? = dbQuery {
         val entity = UserEntity.find { UsersTable.name eq userRequest.username }.firstOrNull()
-        if(entity != null)
-            entity.toUser()
-
-        UserEntity.newSuspend {
-            name = userRequest.username
-            password = hashPassword(userRequest.password)
-        }.toUser()
+        entity?.toUser()
+            ?: UserEntity.newSuspend {
+                name = userRequest.username
+                password = hashPassword(userRequest.password)
+            }.toUser()
     }
 
     override suspend fun getUserById(id: Long): User? = dbQuery {

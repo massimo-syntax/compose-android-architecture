@@ -10,3 +10,9 @@ database:
   driver: "mysql"
   user: "user_ktor_112233"
   password: "password"
+
+jwt:
+  domain: "http://localhost/"
+  audience: "audience-admin"
+  realm: "Something about the server or path"
+  secret: "s(env)secret"
